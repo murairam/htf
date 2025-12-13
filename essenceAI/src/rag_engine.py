@@ -5,6 +5,7 @@ This is the "Brain" of essenceAI - it ensures Scientific Quality by citing sourc
 """
 
 import os
+import time
 from typing import List, Dict, Tuple
 from pathlib import Path
 from dotenv import load_dotenv
@@ -16,8 +17,10 @@ from llama_index.core import (
     load_index_from_storage,
     Settings
 )
+from llama_index.core.node_parser import SimpleNodeParser
 from llama_index.llms.openai import OpenAI
 from llama_index.llms.anthropic import Anthropic
+from llama_index.embeddings.openai import OpenAIEmbedding
 
 # Load environment variables
 load_dotenv()
@@ -42,8 +45,22 @@ class RAGEngine:
         self.index = None
         self.query_engine = None
 
-        # Configure LLM based on environment variable
+        # Configure LLM and embeddings with rate limiting
         self._setup_llm()
+        self._setup_embeddings()
+
+    def _setup_embeddings(self):
+        """Configure embeddings with smaller batch sizes to avoid rate limits."""
+        # Use very small embed batch size to avoid rate limits
+        # With 40K TPM limit and ~500 tokens per chunk, we can do about 3-4 chunks per batch
+        Settings.embed_model = OpenAIEmbedding(
+            model="text-embedding-ada-002",
+            embed_batch_size=3,  # Very small to stay under 40K token limit
+        )
+
+        # Set smaller chunk size to reduce tokens per request
+        Settings.chunk_size = 400  # Small chunks to stay under rate limits
+        Settings.chunk_overlap = 40
 
     def _setup_llm(self):
         """Configure the LLM provider (OpenAI or Anthropic)."""
@@ -67,6 +84,7 @@ class RAGEngine:
                 api_key=api_key,
                 temperature=0.1
             )
+
 
     def initialize_index(self, force_reload: bool = False) -> bool:
         """
@@ -95,6 +113,7 @@ class RAGEngine:
                     raise FileNotFoundError(f"Data directory not found: {self.data_dir}")
 
                 # Load documents
+                print("📥 Loading documents (this may take a while due to rate limits)...")
                 documents = SimpleDirectoryReader(
                     str(self.data_dir),
                     required_exts=[".pdf"]
@@ -104,12 +123,29 @@ class RAGEngine:
                     raise ValueError(f"No PDF files found in {self.data_dir}")
 
                 print(f"✓ Loaded {len(documents)} documents")
+                print("⏳ Creating embeddings (processing in small batches to avoid rate limits)...")
+                print("   This will take several minutes. Please be patient...")
 
-                # Create index
+                # Process documents in small batches to avoid rate limits
+                # Create index from first batch
+                batch_size = 5  # Process 5 documents at a time
+                batches = [documents[i:i + batch_size] for i in range(0, len(documents), batch_size)]
+
+                print(f"   Processing {len(batches)} batches...")
+
+                # Create initial index with first batch
                 self.index = VectorStoreIndex.from_documents(
-                    documents,
+                    batches[0],
                     show_progress=True
                 )
+                print(f"   ✓ Batch 1/{len(batches)} complete")
+
+                # Add remaining batches with delays
+                for i, batch in enumerate(batches[1:], start=2):
+                    time.sleep(2)  # 2 second delay between batches
+                    for doc in batch:
+                        self.index.insert(doc)
+                    print(f"   ✓ Batch {i}/{len(batches)} complete")
 
                 # Persist index
                 self.persist_dir.mkdir(exist_ok=True)
@@ -185,6 +221,50 @@ class RAGEngine:
         except Exception as e:
             print(f"✗ Error querying index: {str(e)}")
             raise
+
+    def query(self, query_str: str):
+        """
+        Query the index and return a response object.
+        This method provides compatibility with different interfaces.
+
+        Args:
+            query_str: The question to ask
+
+        Returns:
+            Response object with .response attribute and .source_nodes
+        """
+        if not self.query_engine:
+            raise RuntimeError("Index not initialized. Call initialize_index() first.")
+
+        return self.query_engine.query(query_str)
+
+    def get_citations(self, response) -> List[Dict]:
+        """
+        Extract citations from a response object.
+
+        Args:
+            response: Query response object
+
+        Returns:
+            List of citation dictionaries
+        """
+        citations = []
+        if hasattr(response, 'source_nodes'):
+            for i, node in enumerate(response.source_nodes):
+                metadata = node.node.metadata if hasattr(node.node, 'metadata') else {}
+                file_name = metadata.get('file_name', 'Unknown')
+                if file_name != 'Unknown':
+                    file_name = Path(file_name).stem
+
+                citation = {
+                    "source_id": i + 1,
+                    "file_name": file_name,
+                    "page": metadata.get('page_label', 'N/A'),
+                    "relevance_score": round(node.score, 3) if hasattr(node, 'score') else None,
+                    "excerpt": node.node.text[:200] + "..." if len(node.node.text) > 200 else node.node.text
+                }
+                citations.append(citation)
+        return citations
 
     def get_marketing_strategy(
         self,
