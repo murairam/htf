@@ -3,16 +3,13 @@ OPTIMIZED RAG Engine - Reduces API calls by 80%
 - Uses smaller chunk sizes to avoid rate limits
 - Implements aggressive caching
 - Batch processing for embeddings
+- Inherits shared functionality from BaseRAGEngine
 """
 
 import os
-import hashlib
 import time
 from typing import List, Dict, Tuple, Optional
 from pathlib import Path
-from dotenv import load_dotenv
-import json
-import logging
 
 from llama_index.core import (
     VectorStoreIndex,
@@ -20,48 +17,39 @@ from llama_index.core import (
     StorageContext,
     load_index_from_storage,
     Settings,
-    Document
 )
-from llama_index.core.node_parser import SentenceSplitter
-from llama_index.llms.openai import OpenAI
-from llama_index.embeddings.openai import OpenAIEmbedding
 
 # Import our rate-limited embedding wrapper
 from rate_limited_embedding import RateLimitedEmbedding
 
-# Load environment variables
-load_dotenv()
+# Import base class
+from rag_engine_base import BaseRAGEngine
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Import logger
+from logger import get_logger
+
+# Initialize logger
+logger = get_logger(__name__)
 
 
-class OptimizedRAGEngine:
+class OptimizedRAGEngine(BaseRAGEngine):
     """
     Optimized RAG engine that minimizes API calls.
+    Uses rate-limited embeddings and local storage.
     """
 
     def __init__(self, data_dir: str = "data", persist_dir: str = ".storage", cache_dir: str = ".cache"):
-        self.data_dir = Path(data_dir)
-        self.persist_dir = Path(persist_dir)
-        self.cache_dir = Path(cache_dir)
-        self.cache_dir.mkdir(exist_ok=True)
+        """Initialize optimized RAG engine with rate limiting."""
+        super().__init__(data_dir, persist_dir, cache_dir)
+        self._setup_embeddings()
+        self._setup_base_llm(model="gpt-4o-mini", temperature=0.1)
+        self._setup_base_node_parser(chunk_size=300, chunk_overlap=30)
 
-        self.index = None
-        self.query_engine = None
-
-        # Query cache to avoid repeated API calls
-        self.query_cache = {}
-        self._load_query_cache()
-
-        self._setup_llm()
-
-    def _setup_llm(self):
-        """Configure LLM with optimized settings and aggressive rate limiting."""
+    def _setup_embeddings(self):
+        """Configure embeddings with rate limiting."""
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise ValueError("OPENAI_API_KEY not found")
+            raise ValueError("OPENAI_API_KEY not found in environment variables")
 
         # Use our custom rate-limited embedding wrapper
         # This adds 2-second delays between requests to prevent rate limits
@@ -74,45 +62,16 @@ class OptimizedRAGEngine:
         
         logger.info("✓ Using rate-limited embedding with 2s delays between requests")
 
-        # Use GPT-4o-mini for cheaper queries (can upgrade to gpt-4o for final demo)
-        Settings.llm = OpenAI(
-            model="gpt-4o-mini",  # Much cheaper than gpt-4o
-            api_key=api_key,
-            temperature=0.1
-        )
-
-        # Optimize chunk size to reduce embeddings - smaller chunks = fewer tokens per request
-        Settings.node_parser = SentenceSplitter(
-            chunk_size=300,  # REDUCED from 400 to 300 - even smaller chunks
-            chunk_overlap=30  # Reduced overlap
-        )
-        
-        logger.info("✓ Chunk size: 300 tokens, overlap: 30 tokens")
-
-    def _load_query_cache(self):
-        """Load cached queries from disk."""
-        cache_file = self.cache_dir / "query_cache.json"
-        if cache_file.exists():
-            try:
-                with open(cache_file, 'r') as f:
-                    self.query_cache = json.load(f)
-                print(f"📦 Loaded {len(self.query_cache)} cached queries")
-            except:
-                self.query_cache = {}
-
-    def _save_query_cache(self):
-        """Save query cache to disk."""
-        cache_file = self.cache_dir / "query_cache.json"
-        with open(cache_file, 'w') as f:
-            json.dump(self.query_cache, f)
-
-    def _get_query_hash(self, query: str) -> str:
-        """Generate hash for query caching."""
-        return hashlib.md5(query.encode()).hexdigest()
-
     def initialize_index(self, force_reload: bool = False, max_retries: int = 3) -> bool:
         """
         Load or create index with optimizations and rate limit handling.
+        
+        Args:
+            force_reload: Force rebuilding the index
+            max_retries: Maximum number of retries on rate limit errors
+            
+        Returns:
+            True if successful
         """
         try:
             # Try to load existing index first
@@ -158,10 +117,15 @@ class OptimizedRAGEngine:
                             retry_count += 1
                             if retry_count < max_retries:
                                 wait_time = 10 * retry_count  # Exponential backoff
-                                logger.warning(f"⚠️ Rate limit hit (attempt {retry_count}/{max_retries}). Waiting {wait_time} seconds...")
+                                logger.warning(
+                                    f"⚠️ Rate limit hit (attempt {retry_count}/{max_retries}). "
+                                    f"Waiting {wait_time} seconds..."
+                                )
                                 time.sleep(wait_time)
                             else:
-                                logger.error("❌ Max retries reached. Please try again later or reduce the number of PDFs.")
+                                logger.error(
+                                    "❌ Max retries reached. Please try again later or reduce the number of PDFs."
+                                )
                                 raise
                         else:
                             raise
@@ -179,91 +143,15 @@ class OptimizedRAGEngine:
 
             return True
 
-        except Exception as e:
-            logger.error(f"✗ Error: {str(e)}")
+        except FileNotFoundError as e:
+            logger.error(f"Data directory or files not found: {e}")
             raise
-
-    def get_cited_answer(self, query: str, use_cache: bool = True) -> Tuple[str, List[Dict]]:
-        """
-        Query with caching to avoid repeated API calls.
-        """
-        if not self.query_engine:
-            raise RuntimeError("Index not initialized")
-
-        # Check cache first
-        query_hash = self._get_query_hash(query)
-        if use_cache and query_hash in self.query_cache:
-            print("💾 Using cached result (no API call)")
-            cached = self.query_cache[query_hash]
-            return cached['answer'], cached['citations']
-
-        try:
-            # Make API call
-            response = self.query_engine.query(query)
-            answer = str(response)
-
-            # Extract citations
-            citations = []
-            if hasattr(response, 'source_nodes'):
-                for i, node in enumerate(response.source_nodes):
-                    metadata = node.node.metadata if hasattr(node.node, 'metadata') else {}
-                    file_name = Path(metadata.get('file_name', 'Unknown')).stem
-                    page_num = metadata.get('page_label', 'N/A')
-                    score = round(node.score, 3) if hasattr(node, 'score') else None
-                    text_excerpt = node.node.text[:200] + "..."
-
-                    citations.append({
-                        "source_id": i + 1,
-                        "file_name": file_name,
-                        "page": page_num,
-                        "relevance_score": score,
-                        "excerpt": text_excerpt
-                    })
-
-            # Cache the result
-            self.query_cache[query_hash] = {
-                'answer': answer,
-                'citations': citations
-            }
-            self._save_query_cache()
-
-            return answer, citations
-
-        except Exception as e:
-            print(f"✗ Error: {str(e)}")
+        except ValueError as e:
+            logger.error(f"Invalid data or configuration: {e}")
             raise
-
-    def get_marketing_strategy(
-        self,
-        product_concept: str,
-        category: str,
-        target_segment: str = "Skeptic"
-    ) -> Tuple[str, List[Dict]]:
-        """Get marketing strategy with caching."""
-        query = f"""Based on research about {category} and {target_segment} consumers:
-
-Product: {product_concept}
-
-Provide a concise marketing strategy (3-4 key points) addressing:
-1. Key psychological factors for this segment
-2. Recommended messaging approach
-3. What to avoid
-
-Cite specific research findings."""
-
-        return self.get_cited_answer(query)
-
-    def get_consumer_insights(self, category: str) -> Tuple[str, List[Dict]]:
-        """Get consumer insights with caching."""
-        query = f"""Summarize key consumer acceptance factors for {category} products:
-- Main barriers
-- Success factors
-- Role of familiarity"""
-
-        return self.get_cited_answer(query)
-
-    def clear_cache(self):
-        """Clear query cache to force fresh API calls."""
-        self.query_cache = {}
-        self._save_query_cache()
-        print("🗑️ Cache cleared")
+        except (ConnectionError, TimeoutError) as e:
+            logger.error(f"API connection error during index creation: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error initializing index: {e}", exc_info=True)
+            raise
