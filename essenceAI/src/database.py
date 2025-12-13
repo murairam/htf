@@ -72,6 +72,37 @@ class EssenceAIDatabase:
             )
         """)
 
+        # Create indexes for performance optimization
+        # Index on category for fast competitor lookups
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_competitors_category
+            ON competitors(category)
+        """)
+
+        # Index on last_updated for cache validation
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_competitors_last_updated
+            ON competitors(last_updated)
+        """)
+
+        # Composite index for filtered cache queries
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_analysis_cache_category_created
+            ON analysis_cache(category, created_at)
+        """)
+
+        # Index on created_at for cache cleanup
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_analysis_cache_created_at
+            ON analysis_cache(created_at)
+        """)
+
+        # Index on product_urls created_at
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_product_urls_created_at
+            ON product_urls(created_at)
+        """)
+
         self.conn.commit()
 
     def add_competitor(self, data: Dict) -> int:
@@ -270,3 +301,17 @@ class EssenceAIDatabase:
         """Close database connection."""
         if self.conn:
             self.conn.close()
+            self.conn = None
+
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - ensures connection is closed."""
+        self.close()
+        return False
+
+    def __del__(self):
+        """Destructor - cleanup connection if not already closed."""
+        self.close()
