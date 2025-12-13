@@ -74,11 +74,22 @@ with st.sidebar:
     st.image("https://via.placeholder.com/200x80/667eea/ffffff?text=essenceAI", use_container_width=True)
 
     st.markdown("### 🎯 Domain Selection")
-    category = st.selectbox(
-        "Select Innovation Domain",
-        ["Precision Fermentation", "Plant-Based", "Algae"],
-        help="Choose the sustainable food sector to analyze"
+    st.markdown("*Optional: Focus on specific domain*")
+
+    use_category = st.checkbox(
+        "Enable domain-specific analysis",
+        value=False,
+        help="Focus analysis on a specific sustainable food sector"
     )
+
+    if use_category:
+        category = st.selectbox(
+            "Select Innovation Domain",
+            ["Precision Fermentation", "Plant-Based", "Algae"],
+            help="Choose the sustainable food sector to analyze"
+        )
+    else:
+        category = None
 
     st.markdown("### 🧠 Target Consumer Segment")
     st.markdown("*Optional: Add psychological targeting*")
@@ -174,13 +185,34 @@ if analyze_button and product_concept:
                 comp_intel = CompetitorIntelligence()
 
                 # Get competitor data
-                df = comp_intel.get_data(category, query=product_concept)
+                if category:
+                    df = comp_intel.get_data(category, query=product_concept)
+                else:
+                    # Get data from all categories
+                    df_list = []
+                    for cat in ["Precision Fermentation", "Plant-Based", "Algae"]:
+                        df_cat = comp_intel.get_data(cat, query=product_concept)
+                        if not df_cat.empty:
+                            df_list.append(df_cat)
+                    df = pd.concat(df_list, ignore_index=True) if df_list else pd.DataFrame()
 
                 if not df.empty:
                     # Display metrics
                     col1, col2, col3, col4 = st.columns(4)
 
-                    stats = comp_intel.get_market_stats(category)
+                    if category:
+                        stats = comp_intel.get_market_stats(category)
+                    else:
+                        # Calculate stats across all categories
+                        stats = {
+                            'avg_price_per_kg': round(df['Price_per_kg'].mean(), 2),
+                            'avg_co2_emission': round(df['CO2_Emission_kg'].mean(), 2),
+                            'competitor_count': len(df),
+                            'price_range': {
+                                'min': round(df['Price_per_kg'].min(), 2),
+                                'max': round(df['Price_per_kg'].max(), 2)
+                            }
+                        }
 
                     with col1:
                         st.metric("Avg Price/kg", f"${stats['avg_price_per_kg']}")
@@ -260,28 +292,48 @@ if analyze_button and product_concept:
                     rag_engine = st.session_state.rag_engine
 
                     # Get marketing strategy
-                    if segment:
+                    if segment and category:
+                        # Segment-specific + category-specific
                         strategy, citations = rag_engine.get_marketing_strategy(
                             product_concept,
                             category,
                             segment
                         )
 
-                        # Display strategy
                         st.markdown("#### 📝 Recommended Strategy")
-                        st.markdown(f"**Target Segment:** {segment}")
+                        st.markdown(f"**Domain:** {category} | **Target Segment:** {segment}")
                         st.info(strategy)
-                    else:
-                        # General strategy without segment targeting
+                    elif segment and not category:
+                        # Segment-specific but general domain
+                        strategy, citations = rag_engine.get_segment_strategy(
+                            product_concept,
+                            segment
+                        )
+
+                        st.markdown("#### 📝 Recommended Strategy")
+                        st.markdown(f"**Target Segment:** {segment} | **Domain:** All Sustainable Food")
+                        st.info(strategy)
+                    elif category and not segment:
+                        # Category-specific but general segment
                         strategy, citations = rag_engine.get_general_strategy(
                             product_concept,
                             category
                         )
 
-                        # Display strategy
                         st.markdown("#### 📝 General Marketing Strategy")
+                        st.markdown(f"**Domain:** {category}")
                         st.info(strategy)
-                        st.info("💡 **Tip:** Enable 'segment-specific insights' in the sidebar for targeted psychological strategies based on consumer research.")
+                        st.info("💡 **Tip:** Enable 'segment-specific insights' for targeted psychological strategies.")
+                    else:
+                        # Fully general - no category, no segment
+                        strategy, citations = rag_engine.get_universal_strategy(
+                            product_concept
+                        )
+
+                        st.markdown("#### 📝 Universal Marketing Strategy")
+                        st.markdown("**Domain:** All Sustainable Food | **Audience:** General")
+                        st.info(strategy)
+                        st.info("💡 **Tip:** Enable domain and segment filters for more targeted insights.")
 
                     # Display citations
                     st.markdown("#### 📚 Scientific Sources")
@@ -347,7 +399,10 @@ if analyze_button and product_concept:
                     rag_engine = st.session_state.rag_engine
 
                     # Get consumer insights
-                    insights, citations = rag_engine.get_consumer_insights(category)
+                    if category:
+                        insights, citations = rag_engine.get_consumer_insights(category)
+                    else:
+                        insights, citations = rag_engine.get_consumer_insights("sustainable food alternatives")
 
                     st.markdown("#### 📊 Key Findings")
                     st.success(insights)
