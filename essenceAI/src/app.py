@@ -14,7 +14,7 @@ import sys
 sys.path.append(str(Path(__file__).parent))
 
 from competitor_data import CompetitorIntelligence
-from rag_engine import RAGEngine
+from rag_engine_optimized import OptimizedRAGEngine
 
 # Page configuration
 st.set_page_config(
@@ -135,7 +135,7 @@ with st.sidebar:
         with st.spinner("Loading research papers..."):
             try:
                 data_dir = Path(__file__).parent.parent / "data"
-                st.session_state.rag_engine = RAGEngine(data_dir=str(data_dir))
+                st.session_state.rag_engine = OptimizedRAGEngine(data_dir=str(data_dir))
                 st.session_state.rag_engine.initialize_index()
                 st.session_state.index_loaded = True
                 st.success("✅ Research database loaded!")
