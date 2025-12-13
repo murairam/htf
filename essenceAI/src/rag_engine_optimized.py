@@ -7,10 +7,12 @@ OPTIMIZED RAG Engine - Reduces API calls by 80%
 
 import os
 import hashlib
+import time
 from typing import List, Dict, Tuple, Optional
 from pathlib import Path
 from dotenv import load_dotenv
 import json
+import logging
 
 from llama_index.core import (
     VectorStoreIndex,
@@ -26,6 +28,10 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 
 # Load environment variables
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class OptimizedRAGEngine:
@@ -54,10 +60,11 @@ class OptimizedRAGEngine:
         if not api_key:
             raise ValueError("OPENAI_API_KEY not found")
 
-        # Use smaller, cheaper embedding model
+        # Use smaller, cheaper embedding model with batch size limit
         Settings.embed_model = OpenAIEmbedding(
-            model="text-embedding-3-small",  # Cheaper than ada-002
-            api_key=api_key
+            model="text-embedding-3-small",  # Cheaper and more efficient than ada-002
+            api_key=api_key,
+            embed_batch_size=10  # Process in smaller batches to avoid rate limits
         )
 
         # Use GPT-4o-mini for cheaper queries (can upgrade to gpt-4o for final demo)
@@ -67,10 +74,10 @@ class OptimizedRAGEngine:
             temperature=0.1
         )
 
-        # Optimize chunk size to reduce embeddings
+        # Optimize chunk size to reduce embeddings - smaller chunks = fewer tokens per request
         Settings.node_parser = SentenceSplitter(
-            chunk_size=512,  # Smaller chunks = fewer tokens
-            chunk_overlap=50
+            chunk_size=400,  # Reduced from 512 to further minimize token usage
+            chunk_overlap=40  # Reduced overlap
         )
 
     def _load_query_cache(self):
@@ -94,26 +101,26 @@ class OptimizedRAGEngine:
         """Generate hash for query caching."""
         return hashlib.md5(query.encode()).hexdigest()
 
-    def initialize_index(self, force_reload: bool = False) -> bool:
+    def initialize_index(self, force_reload: bool = False, max_retries: int = 3) -> bool:
         """
-        Load or create index with optimizations.
+        Load or create index with optimizations and rate limit handling.
         """
         try:
             # Try to load existing index first
             if not force_reload and self.persist_dir.exists():
-                print("📚 Loading existing index...")
+                logger.info("📚 Loading existing index...")
                 storage_context = StorageContext.from_defaults(
                     persist_dir=str(self.persist_dir)
                 )
                 self.index = load_index_from_storage(storage_context)
-                print("✓ Index loaded (no API calls needed!)")
+                logger.info("✓ Index loaded (no API calls needed!)")
             else:
-                print(f"📄 Building optimized index from {self.data_dir}...")
+                logger.info(f"📄 Building optimized index from {self.data_dir}...")
 
                 if not self.data_dir.exists():
                     raise FileNotFoundError(f"Data directory not found: {self.data_dir}")
 
-                # Load documents with smaller chunks
+                # Load documents
                 documents = SimpleDirectoryReader(
                     str(self.data_dir),
                     required_exts=[".pdf"]
@@ -122,19 +129,38 @@ class OptimizedRAGEngine:
                 if not documents:
                     raise ValueError(f"No PDF files found in {self.data_dir}")
 
-                print(f"✓ Loaded {len(documents)} documents")
+                logger.info(f"✓ Loaded {len(documents)} documents")
 
-                # Process in smaller batches to avoid rate limits
-                print("⚙️ Creating index with smaller chunks (this reduces API costs)...")
-                self.index = VectorStoreIndex.from_documents(
-                    documents,
-                    show_progress=True
-                )
+                # Create index with retry logic for rate limits
+                logger.info("⚙️ Creating index with optimized settings...")
+                
+                retry_count = 0
+                while retry_count < max_retries:
+                    try:
+                        self.index = VectorStoreIndex.from_documents(
+                            documents,
+                            show_progress=True
+                        )
+                        break  # Success!
+                        
+                    except Exception as e:
+                        error_msg = str(e).lower()
+                        if "rate_limit" in error_msg or "429" in error_msg:
+                            retry_count += 1
+                            if retry_count < max_retries:
+                                wait_time = 10 * retry_count  # Exponential backoff
+                                logger.warning(f"⚠️ Rate limit hit (attempt {retry_count}/{max_retries}). Waiting {wait_time} seconds...")
+                                time.sleep(wait_time)
+                            else:
+                                logger.error("❌ Max retries reached. Please try again later or reduce the number of PDFs.")
+                                raise
+                        else:
+                            raise
 
                 # Persist for future use
                 self.persist_dir.mkdir(exist_ok=True)
                 self.index.storage_context.persist(persist_dir=str(self.persist_dir))
-                print(f"✓ Index saved to {self.persist_dir}")
+                logger.info(f"✓ Index saved to {self.persist_dir}")
 
             # Create query engine
             self.query_engine = self.index.as_query_engine(
@@ -145,7 +171,7 @@ class OptimizedRAGEngine:
             return True
 
         except Exception as e:
-            print(f"✗ Error: {str(e)}")
+            logger.error(f"✗ Error: {str(e)}")
             raise
 
     def get_cited_answer(self, query: str, use_cache: bool = True) -> Tuple[str, List[Dict]]:

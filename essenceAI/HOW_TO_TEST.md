@@ -1,5 +1,17 @@
 # 🧪 How to Test the Agent System
 
+## 📦 Prerequisites
+
+**First time?** Install dependencies:
+```bash
+cd essenceAI
+pip install -r requirements.txt
+```
+
+See `INSTALL.md` for detailed installation instructions.
+
+---
+
 ## 🚀 Quick Start (30 seconds)
 
 ```bash
