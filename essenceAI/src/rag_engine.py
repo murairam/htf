@@ -219,6 +219,37 @@ Cite specific findings from the research papers."""
 
         return self.get_cited_answer(query)
 
+    def get_general_strategy(
+        self,
+        product_concept: str,
+        category: str
+    ) -> Tuple[str, List[Dict]]:
+        """
+        Get a general marketing strategy without segment-specific targeting.
+
+        Args:
+            product_concept: Description of the product
+            category: One of "Precision Fermentation", "Plant-Based", "Algae"
+
+        Returns:
+            Tuple of (strategy_text, citations)
+        """
+        query = f"""Based on the research papers about consumer acceptance of sustainable food alternatives:
+
+Product Concept: {product_concept}
+Category: {category}
+
+Provide a comprehensive marketing strategy that addresses:
+1. What are the main factors influencing consumer acceptance in this category?
+2. What messaging approaches are most effective based on research?
+3. What are the key barriers to overcome?
+4. How can the product be positioned to maximize acceptance across different consumer types?
+5. What role does familiarity and habituation play?
+
+Cite specific findings from the research papers."""
+
+        return self.get_cited_answer(query)
+
     def get_consumer_insights(self, category: str) -> Tuple[str, List[Dict]]:
         """
         Get general consumer insights for a category.
