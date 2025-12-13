@@ -14,6 +14,9 @@ anthropic>=0.18.0
 requests>=2.31.0
 tavily-python>=0.3.0
 
+# Optional: Weaviate for cloud vector storage (recommended)
+weaviate-client>=3.25.0
+
 # Testing
 pytest>=7.4.0
 pytest-mock>=3.11.0
