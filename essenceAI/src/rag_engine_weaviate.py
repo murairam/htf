@@ -22,10 +22,8 @@ from llama_index.core import (
 )
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.llms.openai import OpenAI
+from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.vector_stores.weaviate import WeaviateVectorStore
-
-# Import our rate-limited embedding
-from rate_limited_embedding import RateLimitedEmbedding
 
 # Load environment variables
 load_dotenv()
@@ -42,8 +40,8 @@ class WeaviateRAGEngine:
     """
 
     def __init__(
-        self, 
-        data_dir: str = "data", 
+        self,
+        data_dir: str = "data",
         cache_dir: str = ".cache",
         weaviate_url: Optional[str] = None,
         weaviate_api_key: Optional[str] = None,
@@ -52,7 +50,7 @@ class WeaviateRAGEngine:
         self.data_dir = Path(data_dir)
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True)
-        
+
         # Weaviate configuration
         self.weaviate_url = weaviate_url or os.getenv("WEAVIATE_URL")
         self.weaviate_api_key = weaviate_api_key or os.getenv("WEAVIATE_API_KEY")
@@ -69,20 +67,19 @@ class WeaviateRAGEngine:
         self._setup_llm()
 
     def _setup_llm(self):
-        """Configure LLM with rate-limited embeddings."""
+        """Configure LLM with standard embeddings."""
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OPENAI_API_KEY not found")
 
-        # Use rate-limited embedding wrapper
-        Settings.embed_model = RateLimitedEmbedding(
+        # Use standard OpenAI embedding with small batches
+        Settings.embed_model = OpenAIEmbedding(
             model="text-embedding-3-small",
             api_key=api_key,
-            delay_seconds=2.0,  # 2 second delay between requests
-            embed_batch_size=5
+            embed_batch_size=3  # Very small to avoid rate limits
         )
-        
-        logger.info("✓ Using rate-limited embedding (2s delays)")
+
+        logger.info("✓ Using OpenAI embeddings (batch size: 3)")
 
         # Use GPT-4o-mini for queries
         Settings.llm = OpenAI(
@@ -122,7 +119,7 @@ class WeaviateRAGEngine:
         """Set up Weaviate vector store."""
         try:
             import weaviate
-            from weaviate.auth import AuthApiKey
+            from weaviate.classes.init import Auth
         except ImportError:
             raise ImportError(
                 "Weaviate client not installed. Run: pip install weaviate-client"
@@ -135,19 +132,20 @@ class WeaviateRAGEngine:
 
         logger.info(f"🔗 Connecting to Weaviate at {self.weaviate_url}")
 
-        # Connect to Weaviate Cloud
+        # Connect to Weaviate Cloud (v4 API)
         if self.weaviate_api_key:
-            client = weaviate.Client(
-                url=self.weaviate_url,
-                auth_client_secret=AuthApiKey(api_key=self.weaviate_api_key),
-                additional_headers={
+            client = weaviate.connect_to_weaviate_cloud(
+                cluster_url=self.weaviate_url,
+                auth_credentials=Auth.api_key(self.weaviate_api_key),
+                headers={
                     "X-OpenAI-Api-Key": os.getenv("OPENAI_API_KEY")
                 }
             )
         else:
-            client = weaviate.Client(
-                url=self.weaviate_url,
-                additional_headers={
+            client = weaviate.connect_to_custom(
+                http_host=self.weaviate_url.replace("https://", "").replace("http://", ""),
+                http_secure=self.weaviate_url.startswith("https"),
+                headers={
                     "X-OpenAI-Api-Key": os.getenv("OPENAI_API_KEY")
                 }
             )
@@ -157,7 +155,7 @@ class WeaviateRAGEngine:
             weaviate_client=client,
             index_name=self.index_name
         )
-        
+
         logger.info(f"✓ Connected to Weaviate (index: {self.index_name})")
         return client
 
@@ -170,16 +168,18 @@ class WeaviateRAGEngine:
             # Set up Weaviate
             weaviate_client = self._setup_weaviate()
 
-            # Check if index already exists in Weaviate
-            schema = weaviate_client.schema.get()
-            index_exists = any(
-                cls["class"] == self.index_name 
-                for cls in schema.get("classes", [])
-            )
+            # Check if index already exists in Weaviate (v4 API)
+            try:
+                collection = weaviate_client.collections.get(self.index_name)
+                index_exists = True
+                logger.info(f"📚 Found existing collection: {self.index_name}")
+            except Exception:
+                index_exists = False
+                logger.info(f"📝 Collection {self.index_name} does not exist yet")
 
             if index_exists and not force_reload:
                 logger.info("📚 Loading existing index from Weaviate...")
-                
+
                 # Load from Weaviate
                 storage_context = StorageContext.from_defaults(
                     vector_store=self.vector_store
@@ -188,20 +188,24 @@ class WeaviateRAGEngine:
                     self.vector_store,
                     storage_context=storage_context
                 )
-                
+
                 logger.info("✓ Index loaded from Weaviate (no embedding cost!)")
-                
+
             else:
                 if force_reload and index_exists:
                     logger.info("🗑️ Deleting existing index...")
-                    weaviate_client.schema.delete_class(self.index_name)
-                
+                    weaviate_client.collections.delete(self.index_name)
+
                 logger.info(f"📄 Building new index from {self.data_dir}...")
 
                 if not self.data_dir.exists():
                     raise FileNotFoundError(f"Data directory not found: {self.data_dir}")
 
                 # Load documents
+                print("\n" + "="*70)
+                print("📥 Step 1/4: Loading PDF documents")
+                print("="*70)
+                print(f"   Reading from: {self.data_dir}")
                 documents = SimpleDirectoryReader(
                     str(self.data_dir),
                     required_exts=[".pdf"]
@@ -210,9 +214,27 @@ class WeaviateRAGEngine:
                 if not documents:
                     raise ValueError(f"No PDF files found in {self.data_dir}")
 
-                logger.info(f"✓ Loaded {len(documents)} documents")
-                logger.info("⚙️ Creating embeddings and storing in Weaviate...")
-                logger.info("⏳ This will take 5-10 minutes with rate limiting, but only needs to be done ONCE!")
+                print(f"✓ Loaded {len(documents)} PDF documents")
+                total_chars = sum(len(doc.text) for doc in documents)
+                print(f"   Total content: {total_chars:,} characters")
+                print()
+
+                print("="*70)
+                print("🔄 Step 2/4: Parsing documents into chunks")
+                print("="*70)
+                print(f"   Chunk size: 300 tokens")
+                print(f"   Overlap: 30 tokens")
+                print(f"   This creates searchable text segments...")
+                print()
+
+                print("="*70)
+                print("🤖 Step 3/4: Generating embeddings (OpenAI API)")
+                print("="*70)
+                print("   ⚠️  This step takes 5-10 minutes due to rate limits")
+                print("   📊 Processing in batches of 3...")
+                print("   💰 Cost: ~$0.003 (one-time, stored in Weaviate)")
+                print("   ⏱️  Started at:", time.strftime("%H:%M:%S"))
+                print()
 
                 # Create storage context with Weaviate
                 storage_context = StorageContext.from_defaults(
@@ -223,11 +245,21 @@ class WeaviateRAGEngine:
                 self.index = VectorStoreIndex.from_documents(
                     documents,
                     storage_context=storage_context,
-                    show_progress=True
+                    show_progress=True  # Shows progress bar
                 )
 
-                logger.info(f"✓ Index created and stored in Weaviate!")
-                logger.info("💡 Next time you run this, it will load instantly from Weaviate!")
+                print()
+                print("="*70)
+                print("☁️  Step 4/4: Uploading to Weaviate Cloud")
+                print("="*70)
+                print(f"   Cluster: {self.weaviate_url[:50]}...")
+                print(f"✓ Index created and stored in Weaviate!")
+                print(f"✓ Embeddings saved to cloud (index: {self.index_name})")
+                print(f"   Finished at: {time.strftime('%H:%M:%S')}")
+                print()
+                print("💡 Next time: Index loads in <1 second from Weaviate!")
+                print("="*70)
+                print()
 
             # Create query engine
             self.query_engine = self.index.as_query_engine(
@@ -291,6 +323,33 @@ class WeaviateRAGEngine:
             logger.error(f"✗ Error: {str(e)}")
             raise
 
+    def query(self, query_str: str):
+        """
+        Query method for compatibility with different interfaces.
+        Returns the query engine's response object.
+        """
+        if not self.query_engine:
+            raise RuntimeError("Index not initialized")
+        return self.query_engine.query(query_str)
+
+    def get_citations(self, response) -> List[Dict]:
+        """
+        Extract citations from a response object.
+        """
+        citations = []
+        if hasattr(response, 'source_nodes'):
+            for i, node in enumerate(response.source_nodes):
+                metadata = node.node.metadata if hasattr(node.node, 'metadata') else {}
+                file_name = Path(metadata.get('file_name', 'Unknown')).stem
+                citations.append({
+                    "source_id": i + 1,
+                    "file_name": file_name,
+                    "page": metadata.get('page_label', 'N/A'),
+                    "relevance_score": round(node.score, 3) if hasattr(node, 'score') else None,
+                    "excerpt": node.node.text[:200] + "..." if len(node.node.text) > 200 else node.node.text
+                })
+        return citations
+
     def get_marketing_strategy(
         self,
         product_concept: str,
@@ -325,3 +384,25 @@ Cite specific research findings."""
         self.query_cache = {}
         self._save_query_cache()
         logger.info("🗑️ Cache cleared")
+
+    def close(self):
+        """Close Weaviate connection properly."""
+        if hasattr(self, 'client') and self.client:
+            try:
+                self.client.close()
+                logger.info("✓ Weaviate connection closed")
+            except Exception as e:
+                logger.warning(f"Error closing Weaviate connection: {e}")
+
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - ensures connection is closed."""
+        self.close()
+        return False
+
+    def __del__(self):
+        """Destructor - cleanup when object is garbage collected."""
+        self.close()
