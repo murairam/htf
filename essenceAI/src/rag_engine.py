@@ -6,13 +6,9 @@ OPTIMIZED RAG Engine - Reduces API calls by 80%
 """
 
 import os
-<<<<<<< HEAD
 import time
-from typing import List, Dict, Tuple
-=======
 import hashlib
 from typing import List, Dict, Tuple, Optional
->>>>>>> mari
 from pathlib import Path
 from dotenv import load_dotenv
 import json
@@ -25,14 +21,9 @@ from llama_index.core import (
     Settings,
     Document
 )
-<<<<<<< HEAD
-from llama_index.core.node_parser import SimpleNodeParser
-from llama_index.llms.openai import OpenAI
-from llama_index.llms.anthropic import Anthropic
-=======
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.llms.openai import OpenAI
->>>>>>> mari
+from llama_index.llms.anthropic import Anthropic
 from llama_index.embeddings.openai import OpenAIEmbedding
 
 # Load environment variables
@@ -59,14 +50,11 @@ class OptimizedRAGEngine:
         self.index = None
         self.query_engine = None
 
-<<<<<<< HEAD
-        # Configure LLM and embeddings with rate limiting
-=======
         # Query cache to avoid repeated API calls
         self.query_cache = {}
         self._load_query_cache()
 
->>>>>>> mari
+        # Configure LLM and embeddings with rate limiting
         self._setup_llm()
         self._setup_embeddings()
 
@@ -153,12 +141,8 @@ class OptimizedRAGEngine:
                 if not self.data_dir.exists():
                     raise FileNotFoundError(f"Data directory not found: {self.data_dir}")
 
-<<<<<<< HEAD
-                # Load documents
-                print("📥 Loading documents (this may take a while due to rate limits)...")
-=======
                 # Load documents with smaller chunks
->>>>>>> mari
+                print("📥 Loading documents (this may take a while due to rate limits)...")
                 documents = SimpleDirectoryReader(
                     str(self.data_dir),
                     required_exts=[".pdf"]
@@ -167,7 +151,7 @@ class OptimizedRAGEngine:
                 if not documents:
                     raise ValueError(f"No PDF files found in {self.data_dir}")
 
-<<<<<<< HEAD
+                logger.info(f"Loaded {len(documents)} PDF documents")
                 print(f"✓ Loaded {len(documents)} documents")
                 print("⏳ Creating embeddings (processing in small batches to avoid rate limits)...")
                 print("   This will take several minutes. Please be patient...")
@@ -180,12 +164,7 @@ class OptimizedRAGEngine:
                 print(f"   Processing {len(batches)} batches...")
 
                 # Create initial index with first batch
-=======
-                logger.info(f"Loaded {len(documents)} PDF documents")
-
-                # Process in smaller batches to avoid rate limits
                 logger.info("Creating vector index with optimized chunk size...")
->>>>>>> mari
                 self.index = VectorStoreIndex.from_documents(
                     batches[0],
                     show_progress=True
@@ -360,3 +339,7 @@ Cite specific research findings."""
         self.query_cache = {}
         self._save_query_cache()
         logger.info(f"Query cache cleared ({cache_size} entries removed)")
+
+
+# Backward compatibility alias
+RAGEngine = OptimizedRAGEngine

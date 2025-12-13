@@ -363,3 +363,7 @@ Use real companies. Be realistic."""
             'api_cost_saved': f"~${(self.cache_hits * 0.01):.2f}",  # Rough estimate
             **db_stats
         }
+
+
+# Backward compatibility alias
+CompetitorIntelligence = OptimizedCompetitorIntelligence
