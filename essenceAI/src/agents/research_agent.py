@@ -11,7 +11,7 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
 from agents.base_agent import BaseAgent
-from rag_engine import RAGEngine
+from rag_engine import OptimizedRAGEngine
 
 
 class ResearchAgent(BaseAgent):
@@ -32,7 +32,7 @@ class ResearchAgent(BaseAgent):
             name="ResearchAgent",
             description="Analyzes scientific papers and extracts research-backed insights"
         )
-        self.rag_engine = RAGEngine(data_dir=data_dir, persist_dir=persist_dir)
+        self.rag_engine = OptimizedRAGEngine(data_dir=data_dir, persist_dir=persist_dir)
         self.index_initialized = False
 
     def initialize(self, force_reload: bool = False) -> bool:
