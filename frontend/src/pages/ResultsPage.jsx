@@ -73,6 +73,57 @@ const ResultsPage = () => {
     }
   }, [analysisId])
 
+  // Helper function to safely get nested values
+  const getNestedValue = (obj, path, defaultValue = null) => {
+    return path.split('.').reduce((acc, part) => acc && acc[part], obj) || defaultValue
+  }
+
+  // Extract image URL - support both old and new format
+  const getImageUrl = () => {
+    if (!results) return null
+    // Try new format first (from product_information or root)
+    return results.image_front_url || 
+           getNestedValue(results, 'product_information.image_front_url') ||
+           null
+  }
+
+  // Extract scores - adapt to new format with _score suffix
+  const getScores = () => {
+    if (!results) return null
+    
+    // Try new format first (scoring_results.scores)
+    let scores = results.scoring_results?.scores || results.scores || {}
+    
+    // Map new format to display format (handle both _score suffix and without)
+    const mappedScores = {
+      attractiveness: scores.attractiveness_score ?? scores.attractiveness,
+      utility: scores.utility_score ?? scores.utility,
+      positioning: scores.positioning_score ?? scores.positioning,
+      global: scores.global_score ?? scores.global
+    }
+    
+    // Return null only if all scores are undefined/null
+    const hasAnyScore = Object.values(mappedScores).some(v => v !== undefined && v !== null)
+    return hasAnyScore ? mappedScores : null
+  }
+
+  // Extract product info - adapt to new nested structure
+  const getProductInfo = () => {
+    if (!results) return {}
+    
+    const basicInfo = results.product_information?.basic_info || {}
+    const businessObj = results.business_objective || {}
+    
+    return {
+      barcode: results.barcode || basicInfo.product_id,
+      objectives: businessObj.objective_description || results.objectives || results.business_objective,
+      name: basicInfo.name,
+      brand: basicInfo.brand,
+      category: basicInfo.category,
+      productId: basicInfo.product_id
+    }
+  }
+
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
@@ -116,7 +167,29 @@ const ResultsPage = () => {
     )
   }
 
-  const { scores, recommendations, image_url, barcode, objectives } = results
+  const scores = getScores()
+  const imageUrl = getImageUrl()
+  const productInfo = getProductInfo()
+  
+  // Debug: Log scores structure
+  if (results && !scores) {
+    console.log('⚠️ Scores not found. Results structure:', {
+      hasScoringResults: !!results.scoring_results,
+      scoringResults: results.scoring_results,
+      hasScores: !!results.scores,
+      scores: results.scores
+    })
+  }
+  
+  // Extract data from new format
+  const packagingProposals = results.packaging_improvement_proposals || []
+  const gtmStrategy = results.go_to_market_strategy || {}
+  const swotAnalysis = results.swot_analysis || {}
+  const imageAnalysis = results.image_analysis || {}
+  const evidenceExplanations = results.evidence_based_explanations || {}
+  const qualityInsights = results.quality_insights || {}
+  const criteriaBreakdown = results.scoring_results?.criteria_breakdown || {}
+  const confidenceLevel = results.scoring_results?.confidence_level
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
@@ -127,6 +200,11 @@ const ResultsPage = () => {
             📊 Analysis Dashboard
           </h1>
           <p className="text-gray-600">Analysis ID: {analysisId}</p>
+          {confidenceLevel && (
+            <p className="text-sm text-gray-500 mt-1">
+              Confidence Level: <span className="font-semibold capitalize">{confidenceLevel}</span>
+            </p>
+          )}
         </div>
 
         {/* Two Column Layout */}
@@ -135,81 +213,172 @@ const ResultsPage = () => {
           {/* LEFT COLUMN - Image & Scores */}
           <div className="space-y-6">
             
-            {/* Product Image */}
-            <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
-              <h2 className="text-xl font-bold mb-4 text-gray-900">Product Image</h2>
-              {image_url && (
+            {/* Product Image - Only show if image_front_url exists */}
+            {imageUrl && (
+              <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
+                <h2 className="text-xl font-bold mb-4 text-gray-900">Product Image</h2>
                 <img
-                  src={image_url}
+                  src={imageUrl}
                   alt="Product"
                   className="w-full h-80 object-contain rounded-lg border-2 border-gray-200 bg-gray-50"
+                  onError={(e) => {
+                    e.target.style.display = 'none'
+                    e.target.parentElement.innerHTML = '<p class="text-gray-500 text-center py-8">Image not available</p>'
+                  }}
                 />
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Product Details */}
             <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
               <h2 className="text-xl font-bold mb-4 text-gray-900">Product Details</h2>
               <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-semibold text-gray-700">Barcode</p>
-                  <p className="text-gray-900 font-mono">{barcode}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-700">Business Objectives</p>
-                  <p className="text-gray-900">{objectives}</p>
-                </div>
+                {productInfo.name && (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">Product Name</p>
+                    <p className="text-gray-900">{productInfo.name}</p>
+                  </div>
+                )}
+                {productInfo.brand && (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">Brand</p>
+                    <p className="text-gray-900">{productInfo.brand}</p>
+                  </div>
+                )}
+                {productInfo.productId && (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">Product ID</p>
+                    <p className="text-gray-900 font-mono">{productInfo.productId}</p>
+                  </div>
+                )}
+                {productInfo.barcode && (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">Barcode</p>
+                    <p className="text-gray-900 font-mono">{productInfo.barcode}</p>
+                  </div>
+                )}
+                {productInfo.category && (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">Category</p>
+                    <p className="text-gray-900">{productInfo.category}</p>
+                  </div>
+                )}
+                {productInfo.objectives && (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">Business Objectives</p>
+                    <p className="text-gray-900">{productInfo.objectives}</p>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Performance Scores */}
-            <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
-              <h2 className="text-xl font-bold mb-6 text-gray-900">Performance Scores</h2>
-              <div className="space-y-4">
-                <ProgressBar
-                  value={scores.attractiveness}
-                  label="Attractiveness / Visibility"
-                  showValue={true}
-                />
-                <ProgressBar
-                  value={scores.price}
-                  label="Price Positioning"
-                  showValue={true}
-                />
-                <ProgressBar
-                  value={scores.utility}
-                  label="Utility & Value"
-                  showValue={true}
-                />
-                
-                {/* Global Score - Highlighted */}
-                <div className="mt-6 pt-6 border-t-2 border-gray-300">
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border-2 border-green-500">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-2xl">🏆</span>
-                        <h3 className="text-lg font-bold text-gray-900">Global Score</h3>
-                      </div>
-                      <div className="text-3xl font-bold text-green-600">
-                        {scores.global}
-                        <span className="text-lg text-gray-500">/100</span>
+            {scores && (
+              <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
+                <h2 className="text-xl font-bold mb-6 text-gray-900">Performance Scores</h2>
+                <div className="space-y-4">
+                  {(scores.attractiveness !== undefined && scores.attractiveness !== null) && (
+                    <ProgressBar
+                      value={Number(scores.attractiveness)}
+                      label="Attractiveness / Visibility"
+                      showValue={true}
+                    />
+                  )}
+                  {(scores.utility !== undefined && scores.utility !== null) && (
+                    <ProgressBar
+                      value={Number(scores.utility)}
+                      label="Utility & Value"
+                      showValue={true}
+                    />
+                  )}
+                  {(scores.positioning !== undefined && scores.positioning !== null) && (
+                    <ProgressBar
+                      value={Number(scores.positioning)}
+                      label="Positioning"
+                      showValue={true}
+                    />
+                  )}
+                  
+                  {/* Global Score - Highlighted */}
+                  {(scores.global !== undefined && scores.global !== null) && (
+                    <div className="mt-6 pt-6 border-t-2 border-gray-300">
+                      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border-2 border-green-500">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-2xl">🏆</span>
+                            <h3 className="text-lg font-bold text-gray-900">Global Score</h3>
+                          </div>
+                          <div className="text-3xl font-bold text-green-600">
+                            {Number(scores.global).toFixed(1)}
+                            <span className="text-lg text-gray-500">/100</span>
+                          </div>
+                        </div>
+                        <div className="relative h-4 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500 shadow-lg"
+                            style={{ width: `${Number(scores.global)}%` }}
+                          >
+                            <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-2 text-center italic">
+                          Overall performance based on all metrics
+                        </p>
                       </div>
                     </div>
-                    <div className="relative h-4 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500 shadow-lg"
-                        style={{ width: `${scores.global}%` }}
-                      >
-                        <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-600 mt-2 text-center italic">
-                      Overall performance based on all metrics
-                    </p>
-                  </div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Image Analysis - New Section */}
+            {imageAnalysis.package_description && (
+              <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
+                <h2 className="text-xl font-bold mb-4 text-gray-900">Image Analysis</h2>
+                <p className="text-gray-700 mb-4">{imageAnalysis.package_description}</p>
+                
+                {imageAnalysis.visual_observations && imageAnalysis.visual_observations.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Visual Observations</h3>
+                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+                      {imageAnalysis.visual_observations.map((obs, idx) => (
+                        <li key={idx}>{obs}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {imageAnalysis.detected_problems && imageAnalysis.detected_problems.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Detected Problems</h3>
+                    <div className="space-y-2">
+                      {imageAnalysis.detected_problems.map((problem, idx) => (
+                        <div key={idx} className="border-l-4 border-red-400 pl-3 py-2 bg-red-50 rounded">
+                          <p className="text-sm font-semibold text-gray-900">{problem.probleme}</p>
+                          {problem.indice_visuel && (
+                            <p className="text-xs text-gray-600 mt-1">💡 {problem.indice_visuel}</p>
+                          )}
+                          <div className="flex items-center space-x-2 mt-2">
+                            {problem.gravite && (
+                              <span className={`text-xs px-2 py-1 rounded ${
+                                problem.gravite === 'Important' || problem.gravite === 'Critique'
+                                  ? 'bg-red-200 text-red-800'
+                                  : 'bg-yellow-200 text-yellow-800'
+                              }`}>
+                                {problem.gravite}
+                              </span>
+                            )}
+                            {problem.impact && (
+                              <span className="text-xs text-gray-600">Impact: {problem.impact}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* RIGHT COLUMN - Recommendations (Accordions) */}
@@ -217,177 +386,205 @@ const ResultsPage = () => {
             <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-3xl border border-gray-100">
               <h2 className="text-xl font-bold mb-4 text-gray-900">Strategic Recommendations</h2>
               
-              {/* Package Design Accordion */}
-              {recommendations.package_design && recommendations.package_design.length > 0 && (
-                <Accordion title="Package Design" icon="📦" defaultOpen={true}>
+              {/* SWOT Analysis - Updated for new format */}
+              {(swotAnalysis.strengths || swotAnalysis.weaknesses || swotAnalysis.risks) && (
+                <Accordion title="SWOT Analysis" icon="📊" defaultOpen={true}>
                   <div className="space-y-4">
-                    {recommendations.package_design.map((item, index) => (
+                    {swotAnalysis.strengths && swotAnalysis.strengths.length > 0 && (
+                      <div className="bg-green-50 p-3 rounded">
+                        <h4 className="font-semibold text-sm text-green-800 mb-2">💪 Strengths</h4>
+                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                          {swotAnalysis.strengths.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {swotAnalysis.weaknesses && swotAnalysis.weaknesses.length > 0 && (
+                      <div className="bg-red-50 p-3 rounded">
+                        <h4 className="font-semibold text-sm text-red-800 mb-2">⚠️ Weaknesses</h4>
+                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                          {swotAnalysis.weaknesses.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {swotAnalysis.risks && swotAnalysis.risks.length > 0 && (
+                      <div className="bg-yellow-50 p-3 rounded">
+                        <h4 className="font-semibold text-sm text-yellow-800 mb-2">⚡ Risks</h4>
+                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                          {swotAnalysis.risks.map((item, idx) => (
+                            <li key={idx}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </Accordion>
+              )}
+
+              {/* Packaging Improvements - Updated for string array */}
+              {packagingProposals && packagingProposals.length > 0 && (
+                <Accordion title="Packaging Improvements" icon="📦">
+                  <div className="space-y-4">
+                    {packagingProposals.map((proposal, index) => (
                       <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-white rounded">
-                        <h4 className="font-semibold text-base mb-1">{item.title}</h4>
-                        <p className="text-gray-700 text-sm mb-2">{item.description}</p>
-                        {item.priority && (
-                          <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
-                            item.priority === 'high' || item.priority === 'critical' 
-                              ? 'bg-red-100 text-red-800' 
-                              : item.priority === 'medium' 
-                              ? 'bg-yellow-100 text-yellow-800' 
-                              : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {item.priority.toUpperCase()}
-                          </span>
-                        )}
-                        {item.impact && (
-                          <p className="text-xs text-gray-600 mt-2 italic">💡 {item.impact}</p>
-                        )}
+                        <p className="text-gray-700 text-sm">{typeof proposal === 'string' ? proposal : (proposal.title || proposal.description || proposal)}</p>
                       </div>
                     ))}
                   </div>
                 </Accordion>
               )}
 
-              {/* Placement Strategy Accordion */}
-              {recommendations.placement && (
-                <Accordion title="Placement Strategy" icon="📍">
-                  <div className="space-y-3">
-                    <div className="bg-white p-3 rounded">
-                      <p className="text-sm font-semibold text-gray-700 mb-1">Shelf Level</p>
-                      <p className="text-gray-900 text-sm">{recommendations.placement.shelf_level}</p>
-                    </div>
-                    {recommendations.placement.rationale && (
-                      <div className="bg-white p-3 rounded">
-                        <p className="text-sm font-semibold text-gray-700 mb-1">Rationale</p>
-                        <p className="text-gray-900 text-sm">{recommendations.placement.rationale}</p>
+              {/* Go-to-Market Strategy */}
+              {(gtmStrategy.shelf_positioning || gtmStrategy.regional_relevance || gtmStrategy.b2b_targeting) && (
+                <Accordion title="Go-to-Market Strategy" icon="🎯">
+                  <div className="space-y-4">
+                    {gtmStrategy.shelf_positioning && (
+                      <div className="bg-white p-3 rounded border border-gray-200">
+                        <h4 className="font-semibold text-sm mb-2">📍 Shelf Positioning</h4>
+                        <p className="text-sm text-gray-700">{gtmStrategy.shelf_positioning}</p>
                       </div>
                     )}
-                    {recommendations.placement.aisle_position && (
-                      <div className="bg-white p-3 rounded">
-                        <p className="text-sm font-semibold text-gray-700 mb-1">Aisle Position</p>
-                        <p className="text-gray-900 text-sm">{recommendations.placement.aisle_position}</p>
+                    {gtmStrategy.regional_relevance && (
+                      <div className="bg-white p-3 rounded border border-gray-200">
+                        <h4 className="font-semibold text-sm mb-2">🌍 Regional Relevance</h4>
+                        <p className="text-sm text-gray-700">{gtmStrategy.regional_relevance}</p>
                       </div>
                     )}
-                    {recommendations.placement.geographic_zones && (
-                      <div className="bg-white p-3 rounded">
-                        <p className="text-sm font-semibold text-gray-700 mb-2">Geographic Zones</p>
-                        <div className="space-y-2">
-                          {recommendations.placement.geographic_zones.map((zone, index) => (
-                            <div key={index} className="bg-gray-50 p-2 rounded border border-gray-200">
-                              <p className="font-medium text-sm">{zone.zone}</p>
-                              <p className="text-xs text-gray-600 mt-1">{zone.reasoning}</p>
-                              <span className="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded">
-                                {zone.priority}
-                              </span>
+                    {gtmStrategy.b2b_targeting && (
+                      <div className="bg-white p-3 rounded border border-gray-200">
+                        <h4 className="font-semibold text-sm mb-2">🤝 B2B Targeting</h4>
+                        <p className="text-sm text-gray-700">{gtmStrategy.b2b_targeting}</p>
+                      </div>
+                    )}
+                  </div>
+                </Accordion>
+              )}
+
+              {/* Evidence-Based Explanations - New Section */}
+              {(evidenceExplanations.attractiveness || evidenceExplanations.utility || 
+                evidenceExplanations.positioning || evidenceExplanations.global) && (
+                <Accordion title="Evidence-Based Explanations" icon="🔍">
+                  <div className="space-y-4">
+                    {evidenceExplanations.attractiveness && evidenceExplanations.attractiveness.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Attractiveness</h4>
+                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                          {evidenceExplanations.attractiveness.map((exp, idx) => (
+                            <li key={idx}>{exp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {evidenceExplanations.utility && evidenceExplanations.utility.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Utility</h4>
+                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                          {evidenceExplanations.utility.map((exp, idx) => (
+                            <li key={idx}>{exp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {evidenceExplanations.positioning && evidenceExplanations.positioning.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Positioning</h4>
+                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                          {evidenceExplanations.positioning.map((exp, idx) => (
+                            <li key={idx}>{exp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {evidenceExplanations.global && evidenceExplanations.global.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Global</h4>
+                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                          {evidenceExplanations.global.map((exp, idx) => (
+                            <li key={idx}>{exp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </Accordion>
+              )}
+
+              {/* Quality Insights - New Section */}
+              {(qualityInsights.reflector_analysis || qualityInsights.key_insights || qualityInsights.improvement_guidelines) && (
+                <Accordion title="Quality Insights" icon="💡">
+                  <div className="space-y-4">
+                    {qualityInsights.reflector_analysis && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Reflector Analysis</h4>
+                        <p className="text-sm text-gray-700">{qualityInsights.reflector_analysis}</p>
+                      </div>
+                    )}
+                    {qualityInsights.key_insights && qualityInsights.key_insights.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Key Insights</h4>
+                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                          {qualityInsights.key_insights.map((insight, idx) => (
+                            <li key={idx}>{insight}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {qualityInsights.improvement_guidelines && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Improvement Guidelines</h4>
+                        <p className="text-sm text-gray-700">{qualityInsights.improvement_guidelines}</p>
+                      </div>
+                    )}
+                  </div>
+                </Accordion>
+              )}
+
+              {/* Criteria Breakdown - New Section */}
+              {Object.keys(criteriaBreakdown).length > 0 && (
+                <Accordion title="Criteria Breakdown" icon="📋">
+                  <div className="space-y-4">
+                    {criteriaBreakdown.attractiveness && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Attractiveness</h4>
+                        <div className="text-sm text-gray-700 space-y-1">
+                          {Object.entries(criteriaBreakdown.attractiveness).map(([key, value]) => (
+                            <div key={key} className="flex justify-between">
+                              <span className="capitalize">{key.replace(/_/g, ' ')}:</span>
+                              <span className="font-semibold">{String(value)}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
-                  </div>
-                </Accordion>
-              )}
-
-              {/* Commercial Prospection Accordion */}
-              {recommendations.prospection && recommendations.prospection.length > 0 && (
-                <Accordion title="Commercial Prospection" icon="🎯">
-                  <div className="space-y-4">
-                    {recommendations.prospection.map((item, index) => (
-                      <div key={index} className="border-l-4 border-blue-500 pl-4 py-2 bg-white rounded">
-                        <h4 className="font-semibold text-base mb-1">{item.strategy}</h4>
-                        <p className="text-gray-700 text-sm mb-2">{item.description}</p>
-                        {item.target_segments && (
-                          <div className="mt-2">
-                            <p className="text-xs font-semibold text-gray-700 mb-1">Target Segments:</p>
-                            <ul className="list-disc list-inside text-xs text-gray-600 space-y-0.5">
-                              {item.target_segments.map((segment, idx) => (
-                                <li key={idx}>{segment}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {item.key_messaging && (
-                          <p className="text-xs text-gray-600 mt-2 italic">
-                            💬 {item.key_messaging}
-                          </p>
-                        )}
+                    {criteriaBreakdown.utility && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Utility</h4>
+                        <div className="text-sm text-gray-700 space-y-1">
+                          {Object.entries(criteriaBreakdown.utility).map(([key, value]) => (
+                            <div key={key} className="flex justify-between">
+                              <span className="capitalize">{key.replace(/_/g, ' ')}:</span>
+                              <span className="font-semibold">{String(value)}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </Accordion>
-              )}
-
-              {/* Customer Personas Accordion */}
-              {recommendations.personas && recommendations.personas.length > 0 && (
-                <Accordion title="Customer Profiles" icon="👥">
-                  <div className="space-y-3">
-                    {recommendations.personas.map((persona, index) => (
-                      <div key={index} className="bg-white p-4 rounded border border-gray-200">
-                        <h4 className="font-semibold text-base mb-1">{persona.name}</h4>
-                        <p className="text-xs text-gray-600 mb-2">Age: {persona.age_range}</p>
-                        <p className="text-sm text-gray-700 mb-3">{persona.profile}</p>
-                        
-                        {persona.motivations && (
-                          <div className="mb-2">
-                            <p className="text-xs font-semibold text-gray-700 mb-1">Motivations:</p>
-                            <ul className="list-disc list-inside text-xs text-gray-600 space-y-0.5">
-                              {persona.motivations.map((m, idx) => (
-                                <li key={idx}>{m}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {persona.pain_points && (
-                          <div className="mb-2">
-                            <p className="text-xs font-semibold text-gray-700 mb-1">Pain Points:</p>
-                            <ul className="list-disc list-inside text-xs text-gray-600 space-y-0.5">
-                              {persona.pain_points.map((p, idx) => (
-                                <li key={idx}>{p}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        
-                        {persona.buying_behavior && (
-                          <p className="text-xs text-gray-600 mt-2">
-                            <span className="font-semibold">Buying Behavior:</span> {persona.buying_behavior}
-                          </p>
-                        )}
-                        
-                        {persona.engagement_strategy && (
-                          <p className="text-xs text-gray-600 mt-2 italic">
-                            💡 {persona.engagement_strategy}
-                          </p>
-                        )}
+                    )}
+                    {criteriaBreakdown.positioning && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Positioning</h4>
+                        <div className="text-sm text-gray-700 space-y-1">
+                          {Object.entries(criteriaBreakdown.positioning).map(([key, value]) => (
+                            <div key={key} className="flex justify-between">
+                              <span className="capitalize">{key.replace(/_/g, ' ')}:</span>
+                              <span className="font-semibold">{String(value)}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </Accordion>
-              )}
-
-              {/* Distribution Strategy Accordion */}
-              {recommendations.distribution && recommendations.distribution.length > 0 && (
-                <Accordion title="Distribution Strategy" icon="🚚">
-                  <div className="space-y-4">
-                    {recommendations.distribution.map((item, index) => (
-                      <div key={index} className="border-l-4 border-purple-500 pl-4 py-2 bg-white rounded">
-                        <h4 className="font-semibold text-base mb-1">{item.channel}</h4>
-                        <p className="text-gray-700 text-sm mb-2">{item.strategy}</p>
-                        {item.advantages && (
-                          <div className="mt-2">
-                            <p className="text-xs font-semibold text-gray-700 mb-1">Advantages:</p>
-                            <ul className="list-disc list-inside text-xs text-gray-600 space-y-0.5">
-                              {item.advantages.map((adv, idx) => (
-                                <li key={idx}>{adv}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {item.implementation && (
-                          <p className="text-xs text-gray-600 mt-2 italic">
-                            🔧 {item.implementation}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                    )}
                   </div>
                 </Accordion>
               )}

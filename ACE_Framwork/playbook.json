@@ -53,6 +53,60 @@
       "irrelevant_count": 0,
       "created_at": "2025-12-13T20:04:21.679559",
       "updated_at": "2025-12-13T20:04:21.679559"
+    },
+    {
+      "id": "sr-00007",
+      "content": "For products that do not fit into any of the typical plant-based categories (meat alternatives, dairy alternatives, plant milks, snacks/prepared), the utility score should reflect the lack of nutritional benefits typically associated with plant-based foods. This could result in a lower utility score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:45:32.197287",
+      "updated_at": "2025-12-13T22:45:32.197300"
+    },
+    {
+      "id": "sr-00008",
+      "content": "The presence or absence of certifications (organic, vegan, etc.) should be considered in the utility score. Lack of such certifications could decrease the trust/utility perception, resulting in a lower utility score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:45:32.197329",
+      "updated_at": "2025-12-13T22:45:32.197333"
+    },
+    {
+      "id": "sr-00009",
+      "content": "High sugar content (>8g/100g) should decrease the utility score by 10-15 points, due to health concerns associated with high sugar intake.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:56:19.669538",
+      "updated_at": "2025-12-13T22:56:19.669554"
+    },
+    {
+      "id": "sr-00010",
+      "content": "If a product has high sugar content (>8g/100g) and is classified as a NOVA group 4 product, the utility score should be decreased by an additional 5-10 points, reflecting the compounded health concerns associated with high sugar intake and ultra-processed foods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:56:19.669596",
+      "updated_at": "2025-12-13T22:56:19.669603"
+    },
+    {
+      "id": "sr-00011",
+      "content": "Ensure products are correctly categorized before scoring. Incorrect categorization can lead to inappropriate scoring criteria and inaccurate scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T23:04:46.138028",
+      "updated_at": "2025-12-13T23:04:46.138034"
+    },
+    {
+      "id": "sr-00012",
+      "content": "For products that do not fit into any of the typical categories, develop appropriate scoring criteria that reflect the product's unique characteristics. This could result in a lower utility score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T23:04:46.138051",
+      "updated_at": "2025-12-13T23:04:46.138052"
     }
   ],
   "plant_based_heuristics": [],
@@ -66,6 +120,24 @@
       "irrelevant_count": 0,
       "created_at": "2025-12-13T20:04:21.679559",
       "updated_at": "2025-12-13T20:04:21.679559"
+    },
+    {
+      "id": "pkg-00002",
+      "content": "Lack of recyclable packaging should decrease the attractiveness score by an additional 5-10 points and the positioning score by an additional 10-15 points for energy drinks, reflecting the importance of sustainability to consumers of these products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:56:19.669631",
+      "updated_at": "2025-12-13T22:56:19.669637"
+    },
+    {
+      "id": "pkg-00003",
+      "content": "Consider the impact of a product's packaging on its scores, particularly for products in categories where sustainability is important to consumers. Non-recyclable packaging should decrease the attractiveness score by 5-10 points and the positioning score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T23:04:46.138044",
+      "updated_at": "2025-12-13T23:04:46.138045"
     }
   ],
   "go_to_market_rules": [],
@@ -73,7 +145,7 @@
     "version": "1.0",
     "domain": "product_intelligence",
     "created_at": "2025-12-13T17:16:04.639972",
-    "updated_at": "2025-12-13T20:04:21.679559",
-    "total_updates": 14
+    "updated_at": "2025-12-13T23:04:46.138054",
+    "total_updates": 22
   }
 }

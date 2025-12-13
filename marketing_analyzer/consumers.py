@@ -1,9 +1,12 @@
 import json
 import asyncio
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import Analysis
-from .utils import load_static_result
+from .fastapi_client import FastAPIClient
+
+logger = logging.getLogger(__name__)
 
 
 class AnalysisConsumer(AsyncWebsocketConsumer):
@@ -19,8 +22,8 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
         
-        # Start the analysis simulation
-        asyncio.create_task(self.simulate_analysis())
+        # Start the analysis
+        asyncio.create_task(self.run_analysis())
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -33,10 +36,14 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
         # Handle incoming messages if needed
         pass
 
-    async def simulate_analysis(self):
+    async def run_analysis(self):
         """
-        Simulate LLM analysis with progress updates.
-        In production, this would be replaced with actual LLM processing.
+        Run LLM analysis by calling FastAPI service.
+        FastAPI handles:
+        - Product lookup from OpenFoodFacts
+        - Image extraction (image_front_url)
+        - LLM analysis
+        - Complete JSON response
         """
         try:
             # Send initial status
@@ -47,42 +54,61 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
                 'message': 'Analysis started'
             }))
             
-            await asyncio.sleep(1)
-            
-            # Send processing updates
-            progress_steps = [
-                (20, 'Analyzing packaging image...'),
-                (40, 'Processing barcode data...'),
-                (60, 'Evaluating market positioning...'),
-                (80, 'Generating recommendations...'),
-            ]
-            
-            for progress, message in progress_steps:
-                await self.send(text_data=json.dumps({
-                    'type': 'status',
-                    'status': 'processing',
-                    'progress': progress,
-                    'message': message
-                }))
-                await asyncio.sleep(1.5)
-            
-            # Get the actual analysis data from database
+            # Get analysis data from database
             analysis_data = await self.get_analysis_data()
+            if not analysis_data:
+                await self.send_error("Analysis record not found")
+                return
             
-            # Load static result template
-            result_data = load_static_result(self.analysis_id)
+            # Update status
+            await self.send(text_data=json.dumps({
+                'type': 'status',
+                'status': 'processing',
+                'progress': 20,
+                'message': 'Connecting to analysis service...'
+            }))
             
-            # Override with actual uploaded data
-            if analysis_data:
-                result_data['analysis_id'] = str(analysis_data['analysis_id'])
-                result_data['barcode'] = analysis_data['barcode']
-                result_data['objectives'] = analysis_data['objectives']
-                result_data['image_url'] = analysis_data['image_url']
+            # Initialize FastAPI client
+            client = FastAPIClient()
             
-            # Update database
-            await self.update_analysis_result(result_data)
+            # Call FastAPI /run-analysis endpoint
+            # FastAPI will handle:
+            # 1. OpenFoodFacts lookup
+            # 2. Image extraction
+            # 3. LLM analysis
+            # 4. Return complete JSON
+            await self.send(text_data=json.dumps({
+                'type': 'status',
+                'status': 'processing',
+                'progress': 40,
+                'message': 'Analyzing product packaging and market positioning...'
+            }))
             
-            # Send final result
+            success, result = await asyncio.to_thread(
+                client.run_analysis,
+                analysis_data['analysis_id'],
+                analysis_data['barcode'],
+                analysis_data['objectives']
+            )
+            
+            if not success:
+                # result contains error message
+                await self.send_error(result)
+                await self.update_analysis_error(result)
+                return
+            
+            # Analysis successful
+            await self.send(text_data=json.dumps({
+                'type': 'status',
+                'status': 'processing',
+                'progress': 90,
+                'message': 'Finalizing recommendations...'
+            }))
+            
+            # Save results to database
+            await self.update_analysis_result(result)
+            
+            # Send completion status
             await self.send(text_data=json.dumps({
                 'type': 'status',
                 'status': 'done',
@@ -90,20 +116,26 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
                 'message': 'Analysis complete'
             }))
             
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.3)
             
+            # Send final result
             await self.send(text_data=json.dumps({
                 'type': 'final_result',
-                'payload': result_data
+                'payload': result
             }))
             
         except Exception as e:
-            # Send error status
-            await self.send(text_data=json.dumps({
-                'type': 'status',
-                'status': 'error',
-                'message': f'Analysis failed: {str(e)}'
-            }))
+            logger.exception(f"Unexpected error in analysis {self.analysis_id}")
+            await self.send_error("An unexpected error occurred. Please try again.")
+            await self.update_analysis_error(str(e))
+    
+    async def send_error(self, error_message):
+        """Send user-friendly error message via WebSocket."""
+        await self.send(text_data=json.dumps({
+            'type': 'status',
+            'status': 'error',
+            'message': error_message
+        }))
     
     @database_sync_to_async
     def get_analysis_data(self):
@@ -111,12 +143,12 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
         try:
             analysis = Analysis.objects.get(analysis_id=self.analysis_id)
             return {
-                'analysis_id': analysis.analysis_id,
+                'analysis_id': str(analysis.analysis_id),
                 'barcode': analysis.barcode,
                 'objectives': analysis.objectives,
-                'image_url': analysis.image.url if analysis.image else None,
             }
         except Analysis.DoesNotExist:
+            logger.error(f"Analysis not found: {self.analysis_id}")
             return None
     
     @database_sync_to_async
@@ -126,6 +158,20 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
             analysis = Analysis.objects.get(analysis_id=self.analysis_id)
             analysis.result_data = result_data
             analysis.status = 'completed'
+            analysis.error_message = None
             analysis.save()
+            logger.info(f"Analysis completed successfully: {self.analysis_id}")
         except Analysis.DoesNotExist:
-            pass
+            logger.error(f"Analysis not found for update: {self.analysis_id}")
+    
+    @database_sync_to_async
+    def update_analysis_error(self, error_message):
+        """Update the analysis record with error."""
+        try:
+            analysis = Analysis.objects.get(analysis_id=self.analysis_id)
+            analysis.status = 'error'
+            analysis.error_message = error_message
+            analysis.save()
+            logger.error(f"Analysis failed: {self.analysis_id} - {error_message}")
+        except Analysis.DoesNotExist:
+            logger.error(f"Analysis not found for error update: {self.analysis_id}")

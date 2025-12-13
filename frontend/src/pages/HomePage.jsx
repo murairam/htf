@@ -1,54 +1,31 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import BarcodeScanner from '../components/BarcodeScanner'
-import Button from '../components/Button'
 
 const HomePage = () => {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     barcode: '',
-    objectives: '',
-    image: null
+    objectives: ''
   })
-  const [imagePreview, setImagePreview] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState('')
 
   const handleBarcodeDetected = (barcode) => {
     setFormData(prev => ({ ...prev, barcode }))
-  }
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setFormData(prev => ({ ...prev, image: file }))
-      
-      // Create preview
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result)
-      }
-      reader.readAsDataURL(file)
-    }
+    setError('')
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError(null)
-    
+    setError('')
+
     // Validation
     if (!formData.barcode) {
       setError('Please provide a barcode')
       return
     }
-    if (!formData.objectives.trim()) {
-      setError('Please describe your business objectives')
-      return
-    }
-    if (!formData.image) {
-      setError('Please upload a product image')
-      return
-    }
+    // Objectives are optional - no validation needed
 
     setIsSubmitting(true)
 
@@ -56,7 +33,6 @@ const HomePage = () => {
       const formDataToSend = new FormData()
       formDataToSend.append('barcode', formData.barcode)
       formDataToSend.append('objectives', formData.objectives)
-      formDataToSend.append('image', formData.image)
 
       const response = await fetch('/submit/', {
         method: 'POST',
@@ -64,16 +40,13 @@ const HomePage = () => {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to submit analysis')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Submission failed')
       }
 
       const data = await response.json()
-      
-      // Navigate to results page
-      navigate(`/results/${data.analysis_id}`)
-      
+      navigate(`/results/${data.analysis_id}/`)
     } catch (err) {
-      console.error('Submission error:', err)
       setError(err.message || 'Failed to submit analysis. Please try again.')
       setIsSubmitting(false)
     }
@@ -92,83 +65,97 @@ const HomePage = () => {
           </p>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-800 text-sm">{error}</p>
+          </div>
+        )}
+
         {/* Main Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Image Upload */}
+          
+          {/* Barcode Scanner */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4">Product Image</h3>
-            <div className="space-y-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                required
-              />
-              {imagePreview && (
-                <div className="mt-4">
-                  <img
-                    src={imagePreview}
-                    alt="Product preview"
-                    className="max-w-full h-64 object-contain mx-auto rounded-lg border-2 border-gray-200"
-                  />
-                </div>
-              )}
-            </div>
+            <h3 className="text-lg font-semibold mb-4">Product Barcode</h3>
+            <BarcodeScanner onBarcodeDetected={handleBarcodeDetected} />
+            {formData.barcode && (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Detected Barcode:</span>{' '}
+                  <span className="font-mono">{formData.barcode}</span>
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Objectives */}
+          {/* Business Objectives (Optional) */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-semibold mb-4">Business Objectives</h3>
+            <h3 className="text-lg font-semibold mb-4">Business Objectives <span className="text-sm font-normal text-gray-500">(Optional)</span></h3>
             <textarea
               value={formData.objectives}
               onChange={(e) => setFormData(prev => ({ ...prev, objectives: e.target.value }))}
-              placeholder="Describe your business objectives (e.g., increase visibility, beat competitor, optimize pricing, improve shelf placement...)"
+              placeholder="Describe your business objectives (e.g., increase shelf visibility, improve brand perception, optimize pricing strategy, target specific customer segments...)"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-              rows="5"
-              required
+              rows="6"
             />
             <p className="mt-2 text-sm text-gray-500">
-              Example: "Increase shelf visibility in retail stores and outperform competitor X in the plant-based category"
+              💡 Optional: Be specific about what you want to achieve with your product
             </p>
           </div>
 
-          {/* Barcode Scanner */}
-          <BarcodeScanner onBarcodeDetected={handleBarcodeDetected} />
-          
-          {formData.barcode && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-sm font-medium text-green-800">
-                ✓ Barcode captured: <span className="font-mono">{formData.barcode}</span>
-              </p>
-            </div>
-          )}
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-sm text-red-800">{error}</p>
-            </div>
-          )}
-
           {/* Submit Button */}
           <div className="flex justify-center">
-            <Button
+            <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full md:w-auto px-12"
+              className={`px-8 py-4 rounded-lg font-semibold text-white text-lg shadow-lg transition-all duration-200 ${
+                isSubmitting
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700 hover:shadow-xl transform hover:scale-105'
+              }`}
             >
-              {isSubmitting ? 'Submitting...' : 'Analyze Product'}
-            </Button>
+              {isSubmitting ? (
+                <span className="flex items-center space-x-2">
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Analyzing...</span>
+                </span>
+              ) : (
+                '🚀 Analyze Product'
+              )}
+            </button>
           </div>
         </form>
 
-        {/* Footer Info */}
-        <div className="mt-12 text-center text-sm text-gray-500">
-          <p>
-            This AI-driven system analyzes plant-based food products to provide
-            interpretable scores and strategic marketing recommendations.
-          </p>
+        {/* Info Section */}
+        <div className="mt-12 bg-white p-6 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold mb-4">How It Works</h3>
+          <div className="space-y-3 text-gray-700">
+            <div className="flex items-start space-x-3">
+              <span className="text-2xl">1️⃣</span>
+              <div>
+                <p className="font-semibold">Scan or Enter Barcode</p>
+                <p className="text-sm text-gray-600">Use your camera to scan the product barcode or enter it manually</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <span className="text-2xl">2️⃣</span>
+              <div>
+                <p className="font-semibold">Define Your Objectives</p>
+                <p className="text-sm text-gray-600">Tell us what you want to achieve with your product</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <span className="text-2xl">3️⃣</span>
+              <div>
+                <p className="font-semibold">Get AI-Powered Insights</p>
+                <p className="text-sm text-gray-600">Receive detailed scores, SWOT analysis, and strategic recommendations</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

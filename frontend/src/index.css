@@ -15,3 +15,59 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* QuaggaJS video styling - ensure video fills container */
+#barcode-scanner video,
+#barcode-scanner canvas {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+#barcode-scanner > div {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  background: transparent !important;
+}
+
+/* Hide or style QuaggaJS debug overlays */
+#barcode-scanner .drawingBuffer,
+#barcode-scanner canvas.drawingBuffer {
+  display: none !important;
+}
+
+/* Ensure only the video is visible, hide any debug overlays */
+#barcode-scanner canvas:not(:first-of-type) {
+  display: none !important;
+}
+
+/* Style QuaggaJS container to prevent overlays - make everything transparent */
+#barcode-scanner .viewport-wrapper,
+#barcode-scanner .viewport,
+#barcode-scanner .viewport > div,
+#barcode-scanner > div > div {
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Make sure all QuaggaJS containers are transparent, but not the root container */
+#barcode-scanner > div *:not(video):not(canvas) {
+  background-color: transparent !important;
+}
+
+/* But keep the video visible */
+#barcode-scanner video {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Ensure the root container keeps its black background */
+#barcode-scanner {
+  background-color: black !important;
+}
