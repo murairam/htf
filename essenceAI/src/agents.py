@@ -201,7 +201,7 @@ class CompetitorAgent(BaseAgent):
         task.add_log("Fetching competitor data...")
 
         product_concept = params.get('product_concept', '')
-        category = params.get('category', 'Plant-Based')
+        category = params.get('category')  # Don't default to 'Plant-Based'
         max_results = params.get('max_results', 10)
 
         competitors = self.competitor_intel.get_competitors(
@@ -229,9 +229,12 @@ class CompetitorAgent(BaseAgent):
         if not competitors:
             return {'error': 'No competitor data available'}
 
-        # Calculate market statistics
-        prices = [c.get('Price (€/kg)', 0) for c in competitors if c.get('Price (€/kg)')]
-        co2_values = [c.get('CO₂ (kg)', 0) for c in competitors if c.get('CO₂ (kg)')]
+        # Calculate market statistics with error handling for empty data
+        prices = [c.get('Price (€/kg)', 0) for c in competitors if c.get('Price (€/kg)') is not None]
+        co2_values = [c.get('CO₂ (kg)', 0) for c in competitors if c.get('CO₂ (kg)') is not None]
+
+        if not prices or not co2_values:
+            return {'error': 'Competitor data is incomplete - missing price or CO2 information'}
 
         analysis = {
             'market_size': len(competitors),
@@ -269,10 +272,10 @@ class CompetitorAgent(BaseAgent):
         }
 
         for comp in competitors:
-            price = comp.get('Price (€/kg)', 0)
-            # Handle None values
+            price = comp.get('Price (€/kg)')
+            # Handle None values - skip competitors without price data
             if price is None:
-                price = 0
+                continue
 
             if price < 20:
                 price_ranges['budget'].append(comp)
@@ -280,6 +283,11 @@ class CompetitorAgent(BaseAgent):
                 price_ranges['mid_range'].append(comp)
             else:
                 price_ranges['premium'].append(comp)
+
+        # Check if we have any valid pricing data
+        total_with_prices = sum(len(v) for v in price_ranges.values())
+        if total_with_prices == 0:
+            return {'error': 'No valid pricing data available for analysis'}
 
         analysis = {
             'price_segments': {
@@ -338,8 +346,8 @@ class CompetitorAgent(BaseAgent):
         if not competitors:
             return ["No competitor data available for insights"]
 
-        # Price insights
-        prices = [c.get('Price (€/kg)', 0) for c in competitors if c.get('Price (€/kg)')]
+        # Price insights - filter out None values
+        prices = [c.get('Price (€/kg)') for c in competitors if c.get('Price (€/kg)') is not None]
         if prices:
             avg_price = sum(prices) / len(prices)
             insights.append(f"Average market price: €{avg_price:.2f}/kg")
@@ -347,8 +355,8 @@ class CompetitorAgent(BaseAgent):
             if max(prices) / min(prices) > 2:
                 insights.append("High price variance indicates diverse market segments")
 
-        # Sustainability insights
-        co2_values = [c.get('CO₂ (kg)', 0) for c in competitors if c.get('CO₂ (kg)')]
+        # Sustainability insights - filter out None values
+        co2_values = [c.get('CO₂ (kg)') for c in competitors if c.get('CO₂ (kg)') is not None]
         if co2_values:
             avg_co2 = sum(co2_values) / len(co2_values)
             insights.append(f"Average CO₂ footprint: {avg_co2:.2f} kg/kg product")

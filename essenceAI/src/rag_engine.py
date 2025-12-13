@@ -6,13 +6,9 @@ OPTIMIZED RAG Engine - Reduces API calls by 80%
 """
 
 import os
-<<<<<<< HEAD
 import time
-from typing import List, Dict, Tuple
-=======
 import hashlib
 from typing import List, Dict, Tuple, Optional
->>>>>>> mari
 from pathlib import Path
 from dotenv import load_dotenv
 import json
@@ -25,14 +21,8 @@ from llama_index.core import (
     Settings,
     Document
 )
-<<<<<<< HEAD
-from llama_index.core.node_parser import SimpleNodeParser
-from llama_index.llms.openai import OpenAI
-from llama_index.llms.anthropic import Anthropic
-=======
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.llms.openai import OpenAI
->>>>>>> mari
 from llama_index.embeddings.openai import OpenAIEmbedding
 
 # Load environment variables
@@ -59,14 +49,10 @@ class OptimizedRAGEngine:
         self.index = None
         self.query_engine = None
 
-<<<<<<< HEAD
-        # Configure LLM and embeddings with rate limiting
-=======
         # Query cache to avoid repeated API calls
         self.query_cache = {}
         self._load_query_cache()
 
->>>>>>> mari
         self._setup_llm()
         self._setup_embeddings()
 
@@ -129,10 +115,22 @@ class OptimizedRAGEngine:
         with open(cache_file, 'w') as f:
             json.dump(self.query_cache, f)
 
-    def _get_query_hash(self, query: str) -> str:
-        """Generate hash for query caching."""
-        return hashlib.md5(query.encode()).hexdigest()
+    def _get_query_hash(self, query: str, product_context: Optional[str] = None) -> str:
+        """
+        Generate hash for query caching with product context.
 
+        Args:
+            query: The query string
+            product_context: Optional product description to make cache product-specific
+
+        Returns:
+            Hash string for caching
+        """
+        # Include product context in hash to ensure different products get different results
+        cache_key = query
+        if product_context:
+            cache_key = f"{product_context}||{query}"
+        return hashlib.md5(cache_key.encode()).hexdigest()
 
     def initialize_index(self, force_reload: bool = False) -> bool:
         """
@@ -153,12 +151,8 @@ class OptimizedRAGEngine:
                 if not self.data_dir.exists():
                     raise FileNotFoundError(f"Data directory not found: {self.data_dir}")
 
-<<<<<<< HEAD
                 # Load documents
                 print("📥 Loading documents (this may take a while due to rate limits)...")
-=======
-                # Load documents with smaller chunks
->>>>>>> mari
                 documents = SimpleDirectoryReader(
                     str(self.data_dir),
                     required_exts=[".pdf"]
@@ -167,25 +161,17 @@ class OptimizedRAGEngine:
                 if not documents:
                     raise ValueError(f"No PDF files found in {self.data_dir}")
 
-<<<<<<< HEAD
                 print(f"✓ Loaded {len(documents)} documents")
                 print("⏳ Creating embeddings (processing in small batches to avoid rate limits)...")
                 print("   This will take several minutes. Please be patient...")
 
                 # Process documents in small batches to avoid rate limits
-                # Create index from first batch
                 batch_size = 5  # Process 5 documents at a time
                 batches = [documents[i:i + batch_size] for i in range(0, len(documents), batch_size)]
 
                 print(f"   Processing {len(batches)} batches...")
 
                 # Create initial index with first batch
-=======
-                logger.info(f"Loaded {len(documents)} PDF documents")
-
-                # Process in smaller batches to avoid rate limits
-                logger.info("Creating vector index with optimized chunk size...")
->>>>>>> mari
                 self.index = VectorStoreIndex.from_documents(
                     batches[0],
                     show_progress=True
@@ -225,15 +211,23 @@ class OptimizedRAGEngine:
             logger.error(f"Unexpected error initializing index: {e}", exc_info=True)
             raise
 
-    def get_cited_answer(self, query: str, use_cache: bool = True) -> Tuple[str, List[Dict]]:
+    def get_cited_answer(self, query: str, use_cache: bool = False, product_context: Optional[str] = None) -> Tuple[str, List[Dict]]:
         """
-        Query with caching to avoid repeated API calls.
+        Query with optional caching to avoid repeated API calls.
+
+        Args:
+            query: The query string
+            use_cache: Whether to use cached results (default False for dynamic queries)
+            product_context: Product description to make cache product-specific
+
+        Returns:
+            Tuple of (answer, citations)
         """
         if not self.query_engine:
             raise RuntimeError("Index not initialized")
 
-        # Check cache first
-        query_hash = self._get_query_hash(query)
+        # Check cache first (with product context)
+        query_hash = self._get_query_hash(query, product_context)
         if use_cache and query_hash in self.query_cache:
             logger.info("Cache hit: Using cached query result (no API call)")
             cached = self.query_cache[query_hash]
@@ -329,9 +323,18 @@ class OptimizedRAGEngine:
         self,
         product_concept: str,
         category: str,
-        target_segment: str = "Skeptic"
+        target_segment: str = "Skeptic",
+        use_cache: bool = False
     ) -> Tuple[str, List[Dict]]:
-        """Get marketing strategy with caching."""
+        """
+        Get marketing strategy with product-specific results.
+
+        Args:
+            product_concept: The product to analyze
+            category: Product category
+            target_segment: Target consumer segment
+            use_cache: Whether to use cached results (default False for dynamic queries)
+        """
         query = f"""Based on research about {category} and {target_segment} consumers:
 
 Product: {product_concept}
@@ -343,16 +346,105 @@ Provide a concise marketing strategy (3-4 key points) addressing:
 
 Cite specific research findings."""
 
-        return self.get_cited_answer(query)
+        return self.get_cited_answer(query, use_cache=use_cache, product_context=product_concept)
 
-    def get_consumer_insights(self, category: str) -> Tuple[str, List[Dict]]:
-        """Get consumer insights with caching."""
+    def get_segment_strategy(
+        self,
+        product_concept: str,
+        target_segment: str,
+        use_cache: bool = False
+    ) -> Tuple[str, List[Dict]]:
+        """
+        Get segment-specific strategy without category filter.
+
+        Args:
+            product_concept: The product to analyze
+            target_segment: Target consumer segment
+            use_cache: Whether to use cached results (default False for dynamic queries)
+        """
+        query = f"""Based on research about {target_segment} consumers and sustainable food:
+
+Product: {product_concept}
+
+Provide a concise marketing strategy (3-4 key points) addressing:
+1. Key psychological factors for this segment
+2. Recommended messaging approach
+3. What to avoid
+
+Cite specific research findings."""
+
+        return self.get_cited_answer(query, use_cache=use_cache, product_context=product_concept)
+
+    def get_general_strategy(
+        self,
+        product_concept: str,
+        category: str,
+        use_cache: bool = False
+    ) -> Tuple[str, List[Dict]]:
+        """
+        Get category-specific strategy for general audience.
+
+        Args:
+            product_concept: The product to analyze
+            category: Product category
+            use_cache: Whether to use cached results (default False for dynamic queries)
+        """
+        query = f"""Based on research about {category} products:
+
+Product: {product_concept}
+
+Provide a general marketing strategy (3-4 key points) addressing:
+1. Key consumer acceptance factors
+2. Recommended messaging approach
+3. Common barriers to address
+
+Cite specific research findings."""
+
+        return self.get_cited_answer(query, use_cache=use_cache, product_context=product_concept)
+
+    def get_universal_strategy(
+        self,
+        product_concept: str,
+        use_cache: bool = False
+    ) -> Tuple[str, List[Dict]]:
+        """
+        Get universal strategy for sustainable food products.
+
+        Args:
+            product_concept: The product to analyze
+            use_cache: Whether to use cached results (default False for dynamic queries)
+        """
+        query = f"""Based on research about sustainable food alternatives:
+
+Product: {product_concept}
+
+Provide a universal marketing strategy (3-4 key points) addressing:
+1. General consumer acceptance factors
+2. Recommended messaging approach
+3. Common barriers across all sustainable food categories
+
+Cite specific research findings."""
+
+        return self.get_cited_answer(query, use_cache=use_cache, product_context=product_concept)
+
+    def get_consumer_insights(self, category: str, product_context: Optional[str] = None, use_cache: bool = False) -> Tuple[str, List[Dict]]:
+        """
+        Get consumer insights with optional product context.
+
+        Args:
+            category: Product category
+            product_context: Optional product description for context
+            use_cache: Whether to use cached results (default False for dynamic queries)
+        """
         query = f"""Summarize key consumer acceptance factors for {category} products:
 - Main barriers
 - Success factors
 - Role of familiarity"""
 
-        return self.get_cited_answer(query)
+        if product_context:
+            query += f"\n\nSpecific product context: {product_context}"
+
+        return self.get_cited_answer(query, use_cache=use_cache, product_context=product_context)
 
     def clear_cache(self):
         """Clear query cache to force fresh API calls."""

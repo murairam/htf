@@ -68,8 +68,6 @@ if 'rag_engine' not in st.session_state:
     st.session_state.rag_engine = None
 if 'index_loaded' not in st.session_state:
     st.session_state.index_loaded = False
-if 'auto_init_attempted' not in st.session_state:
-    st.session_state.auto_init_attempted = False
 
 # Sidebar
 with st.sidebar:
@@ -183,15 +181,15 @@ if analyze_button and product_concept:
 
         with st.spinner("Fetching live market data..."):
             try:
-                # Initialize optimized competitor intelligence (database disabled for fresh results)
-                comp_intel = OptimizedCompetitorIntelligence(use_database=False)
+                # Initialize optimized competitor intelligence
+                comp_intel = OptimizedCompetitorIntelligence()
 
-                # Get competitor data - always fetch fresh data
+                # Get competitor data using optimized method
                 competitors = comp_intel.get_competitors(
                     product_concept=product_concept,
                     category=category if category else None,
                     max_results=10,
-                    use_cache=False  # Always fetch fresh data
+                    use_cache=True
                 )
 
                 # Convert to DataFrame
@@ -343,20 +341,6 @@ if analyze_button and product_concept:
     with tab2:
         st.markdown("### 🎯 AI-Powered Marketing Strategy")
 
-        # Auto-initialize if not loaded
-        if not st.session_state.index_loaded and not st.session_state.auto_init_attempted:
-            st.session_state.auto_init_attempted = True
-            with st.spinner("🔄 Auto-initializing research database... (This may take a moment on first run)"):
-                try:
-                    data_dir = Path(__file__).parent.parent / "data"
-                    st.session_state.rag_engine = OptimizedRAGEngine(data_dir=str(data_dir))
-                    st.session_state.rag_engine.initialize_index()
-                    st.session_state.index_loaded = True
-                    st.success("✅ Research database loaded!")
-                except Exception as e:
-                    st.error(f"❌ Auto-initialization failed: {str(e)}")
-                    st.info("💡 Try clicking 'Initialize Research Database' in the sidebar manually.")
-
         if not st.session_state.index_loaded:
             st.warning("⚠️ Research database not loaded. Click 'Initialize Research Database' in the sidebar.")
         else:
@@ -364,14 +348,13 @@ if analyze_button and product_concept:
                 try:
                     rag_engine = st.session_state.rag_engine
 
-                    # Get marketing strategy (always with use_cache=False for dynamic results)
+                    # Get marketing strategy
                     if segment and category:
                         # Segment-specific + category-specific
                         strategy, citations = rag_engine.get_marketing_strategy(
                             product_concept,
                             category,
-                            segment,
-                            use_cache=False
+                            segment
                         )
 
                         st.markdown("#### 📝 Recommended Strategy")
@@ -381,8 +364,7 @@ if analyze_button and product_concept:
                         # Segment-specific but general domain
                         strategy, citations = rag_engine.get_segment_strategy(
                             product_concept,
-                            segment,
-                            use_cache=False
+                            segment
                         )
 
                         st.markdown("#### 📝 Recommended Strategy")
@@ -392,8 +374,7 @@ if analyze_button and product_concept:
                         # Category-specific but general segment
                         strategy, citations = rag_engine.get_general_strategy(
                             product_concept,
-                            category,
-                            use_cache=False
+                            category
                         )
 
                         st.markdown("#### 📝 General Marketing Strategy")
@@ -403,8 +384,7 @@ if analyze_button and product_concept:
                     else:
                         # Fully general - no category, no segment
                         strategy, citations = rag_engine.get_universal_strategy(
-                            product_concept,
-                            use_cache=False
+                            product_concept
                         )
 
                         st.markdown("#### 📝 Universal Marketing Strategy")
@@ -469,20 +449,6 @@ if analyze_button and product_concept:
     with tab3:
         st.markdown("### 🔬 Consumer Research Insights")
 
-        # Auto-initialize if not loaded
-        if not st.session_state.index_loaded and not st.session_state.auto_init_attempted:
-            st.session_state.auto_init_attempted = True
-            with st.spinner("🔄 Auto-initializing research database... (This may take a moment on first run)"):
-                try:
-                    data_dir = Path(__file__).parent.parent / "data"
-                    st.session_state.rag_engine = OptimizedRAGEngine(data_dir=str(data_dir))
-                    st.session_state.rag_engine.initialize_index()
-                    st.session_state.index_loaded = True
-                    st.success("✅ Research database loaded!")
-                except Exception as e:
-                    st.error(f"❌ Auto-initialization failed: {str(e)}")
-                    st.info("💡 Try clicking 'Initialize Research Database' in the sidebar manually.")
-
         if not st.session_state.index_loaded:
             st.warning("⚠️ Research database not loaded. Click 'Initialize Research Database' in the sidebar.")
         else:
@@ -490,19 +456,11 @@ if analyze_button and product_concept:
                 try:
                     rag_engine = st.session_state.rag_engine
 
-                    # Get consumer insights (with product context for dynamic results)
+                    # Get consumer insights
                     if category:
-                        insights, citations = rag_engine.get_consumer_insights(
-                            category,
-                            product_context=product_concept,
-                            use_cache=False
-                        )
+                        insights, citations = rag_engine.get_consumer_insights(category)
                     else:
-                        insights, citations = rag_engine.get_consumer_insights(
-                            "sustainable food alternatives",
-                            product_context=product_concept,
-                            use_cache=False
-                        )
+                        insights, citations = rag_engine.get_consumer_insights("sustainable food alternatives")
 
                     st.markdown("#### 📊 Key Findings")
                     st.success(insights)
@@ -517,6 +475,9 @@ if analyze_button and product_concept:
 
                 except Exception as e:
                     st.error(f"Error extracting insights: {str(e)}")
+
+elif analyze_button:
+    st.warning("⚠️ Please enter a product concept to analyze.")
 
     with tab4:
         st.markdown("### 🤖 AI Agent Orchestration")
@@ -913,10 +874,6 @@ if analyze_button and product_concept:
                 orchestrator.clear_history()
                 st.success("History cleared!")
                 st.rerun()
-
-
-elif analyze_button:
-    st.warning("⚠️ Please enter a product concept to analyze.")
 
 # Footer
 st.markdown("---")

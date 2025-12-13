@@ -11,7 +11,7 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
 from agents.base_agent import BaseAgent
-from competitor_data import CompetitorIntelligence
+from competitor_data import OptimizedCompetitorIntelligence
 
 
 class CompetitorAgent(BaseAgent):
@@ -26,7 +26,7 @@ class CompetitorAgent(BaseAgent):
             name="CompetitorAgent",
             description="Gathers and analyzes real-time competitor intelligence"
         )
-        self.intelligence = CompetitorIntelligence()
+        self.intelligence = OptimizedCompetitorIntelligence()
 
     def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """

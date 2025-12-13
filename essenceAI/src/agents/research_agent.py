@@ -11,7 +11,7 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
 from agents.base_agent import BaseAgent
-from rag_engine import RAGEngine
+from rag_engine import OptimizedRAGEngine
 
 
 class ResearchAgent(BaseAgent):
@@ -32,7 +32,7 @@ class ResearchAgent(BaseAgent):
             name="ResearchAgent",
             description="Analyzes scientific papers and extracts research-backed insights"
         )
-        self.rag_engine = RAGEngine(data_dir=data_dir, persist_dir=persist_dir)
+        self.rag_engine = OptimizedRAGEngine(data_dir=data_dir, persist_dir=persist_dir)
         self.index_initialized = False
 
     def initialize(self, force_reload: bool = False) -> bool:
@@ -63,6 +63,7 @@ class ResearchAgent(BaseAgent):
                 - query: Research question to answer
                 - domain: Optional domain filter (Precision Fermentation, Plant-Based, Algae)
                 - segment: Optional consumer segment
+                - product_context: Optional product description for context
                 - max_results: Maximum number of citations to return
 
         Returns:
@@ -79,30 +80,37 @@ class ResearchAgent(BaseAgent):
 
         domain = task.get('domain')
         segment = task.get('segment')
+        product_context = task.get('product_context')
         max_results = task.get('max_results', 5)
 
         try:
             # Enhance query with domain and segment context
             enhanced_query = self._enhance_query(query, domain, segment)
 
-            # Query the RAG engine
-            response = self.rag_engine.query(enhanced_query)
+            # Add product context if provided
+            if product_context:
+                enhanced_query += f" Specific product: {product_context}"
 
-            # Extract citations
-            citations = self.rag_engine.get_citations(response)
+            # Use get_cited_answer with product context for dynamic results
+            answer, citations = self.rag_engine.get_cited_answer(
+                enhanced_query,
+                use_cache=False,
+                product_context=product_context
+            )
 
             result = {
                 'query': query,
                 'enhanced_query': enhanced_query,
-                'answer': response.response,
+                'answer': answer,
                 'citations': citations[:max_results],
-                'source_nodes': len(response.source_nodes)
+                'product_context': product_context
             }
 
             self.log_action("research_query", {
                 "query": query,
                 "domain": domain,
                 "segment": segment,
+                "product_context": product_context,
                 "citations_found": len(citations)
             })
 
@@ -112,13 +120,14 @@ class ResearchAgent(BaseAgent):
             self.log_action("research_query", {"error": str(e), "query": query})
             return self._create_error_response(str(e), {"query": query})
 
-    def analyze_consumer_acceptance(self, domain: str, segment: Optional[str] = None) -> Dict[str, Any]:
+    def analyze_consumer_acceptance(self, domain: str, segment: Optional[str] = None, product_context: Optional[str] = None) -> Dict[str, Any]:
         """
         Analyze consumer acceptance factors for a specific domain.
 
         Args:
             domain: Food innovation domain
             segment: Optional consumer segment
+            product_context: Optional product description for context
 
         Returns:
             Analysis results with citations
@@ -130,16 +139,18 @@ class ResearchAgent(BaseAgent):
         return self.execute({
             'query': query,
             'domain': domain,
-            'segment': segment
+            'segment': segment,
+            'product_context': product_context
         })
 
-    def get_marketing_insights(self, domain: str, segment: str) -> Dict[str, Any]:
+    def get_marketing_insights(self, domain: str, segment: str, product_context: Optional[str] = None) -> Dict[str, Any]:
         """
         Get marketing insights for a specific domain and consumer segment.
 
         Args:
             domain: Food innovation domain
             segment: Consumer segment
+            product_context: Optional product description for context
 
         Returns:
             Marketing insights with citations
@@ -149,7 +160,8 @@ class ResearchAgent(BaseAgent):
         return self.execute({
             'query': query,
             'domain': domain,
-            'segment': segment
+            'segment': segment,
+            'product_context': product_context
         })
 
     def identify_barriers(self, domain: str) -> Dict[str, Any]:

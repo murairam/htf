@@ -207,7 +207,7 @@ def example_5_quick_analysis():
 
     # Use absolute path to data directory
     data_path = Path(__file__).parent.parent / "data"
-    print("🚀 Running quick analysis...")
+    print("🚀 Running quick analysis (with fresh data, no caching)...")
     result = quick_analysis(
         product_description="Algae-based omega-3 supplement",
         domain="Algae",
@@ -221,6 +221,7 @@ def example_5_quick_analysis():
         print(f"  - Workflow ID: {result['workflow']['id']}")
         print(f"  - Agents used: {', '.join(result['agents_used'])}")
         print(f"  - Steps completed: {len(result['workflow']['steps'])}")
+        print("\n💡 Note: This analysis fetches fresh data each time (no database caching)")
 
 
 def example_6_agent_status():

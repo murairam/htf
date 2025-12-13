@@ -100,7 +100,7 @@ class AgentOrchestrator:
             })
 
             if competitor_result['status'] != 'success':
-                return self._create_workflow_result(workflow, 'partial', 
+                return self._create_workflow_result(workflow, 'partial',
                     "Competitor analysis failed, continuing with available data")
 
             # Step 2: Research Insights
@@ -115,7 +115,8 @@ class AgentOrchestrator:
                 research_result = self.research_agent.execute({
                     'query': research_query,
                     'domain': domain,
-                    'segment': segment
+                    'segment': segment,
+                    'product_context': product_description
                 })
                 workflow['steps'].append({
                     'agent': 'research',
