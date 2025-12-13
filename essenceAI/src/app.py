@@ -13,8 +13,8 @@ import sys
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent))
 
-from competitor_data import CompetitorIntelligence
-from rag_engine_optimized import OptimizedRAGEngine
+from competitor_data import OptimizedCompetitorIntelligence
+from rag_engine import OptimizedRAGEngine
 
 # Page configuration
 st.set_page_config(
@@ -71,7 +71,7 @@ if 'index_loaded' not in st.session_state:
 
 # Sidebar
 with st.sidebar:
-    st.image("https://via.placeholder.com/200x80/667eea/ffffff?text=essenceAI", use_container_width=True)
+    st.image("https://via.placeholder.com/200x80/667eea/ffffff?text=essenceAI", width='stretch')
 
     st.markdown("### 🎯 Domain Selection")
     st.markdown("*Optional: Focus on specific domain*")
@@ -131,14 +131,14 @@ with st.sidebar:
     st.markdown("---")
 
     # Initialize RAG Engine
-    if st.button("🔄 Initialize Research Database", use_container_width=True):
+    if st.button("🔄 Initialize Research Database", width='stretch'):
         with st.spinner("Loading research papers..."):
             try:
                 data_dir = Path(__file__).parent.parent / "data"
                 st.session_state.rag_engine = OptimizedRAGEngine(data_dir=str(data_dir))
                 st.session_state.rag_engine.initialize_index()
                 st.session_state.index_loaded = True
-                st.success("✅ Research database loaded!")
+                st.success("✅ Research database loaded! (Using optimized engine)")
             except Exception as e:
                 st.error(f"❌ Error: {str(e)}")
                 st.info("💡 Make sure PDFs are in the 'data' folder")
@@ -162,14 +162,14 @@ with col1:
 
 with col2:
     st.markdown("**Quick Examples:**")
-    if st.button("🧀 PF Cheese", use_container_width=True):
+    if st.button("🧀 PF Cheese", width='stretch'):
         product_concept = "Precision fermented artisan cheese for European gourmet market"
-    if st.button("🍔 Plant Burger", use_container_width=True):
+    if st.button("🍔 Plant Burger", width='stretch'):
         product_concept = "Plant-based burger for fast-food chains emphasizing taste"
-    if st.button("🌊 Algae Protein", use_container_width=True):
+    if st.button("🌊 Algae Protein", width='stretch'):
         product_concept = "Algae-based protein powder for health-conscious athletes"
 
-analyze_button = st.button("🚀 Analyze Market", type="primary", use_container_width=True)
+analyze_button = st.button("🚀 Analyze Market", type="primary", width='stretch')
 
 if analyze_button and product_concept:
 
@@ -181,38 +181,43 @@ if analyze_button and product_concept:
 
         with st.spinner("Fetching live market data..."):
             try:
-                # Initialize competitor intelligence
-                comp_intel = CompetitorIntelligence()
+                # Initialize optimized competitor intelligence
+                comp_intel = OptimizedCompetitorIntelligence()
 
-                # Get competitor data
-                if category:
-                    df = comp_intel.get_data(category, query=product_concept)
+                # Get competitor data using optimized method
+                competitors = comp_intel.get_competitors(
+                    product_concept=product_concept,
+                    category=category if category else "Plant-Based",
+                    max_results=10,
+                    use_cache=True
+                )
+
+                # Convert to DataFrame
+                if competitors:
+                    df = pd.DataFrame(competitors)
+                    # Rename columns to match expected format
+                    df = df.rename(columns={
+                        'Price (€/kg)': 'Price_per_kg',
+                        'CO₂ (kg)': 'CO2_Emission_kg',
+                        'Marketing Claim': 'Marketing_Claim'
+                    })
                 else:
-                    # Get data from all categories
-                    df_list = []
-                    for cat in ["Precision Fermentation", "Plant-Based", "Algae"]:
-                        df_cat = comp_intel.get_data(cat, query=product_concept)
-                        if not df_cat.empty:
-                            df_list.append(df_cat)
-                    df = pd.concat(df_list, ignore_index=True) if df_list else pd.DataFrame()
+                    df = pd.DataFrame()
 
                 if not df.empty:
                     # Display metrics
                     col1, col2, col3, col4 = st.columns(4)
 
-                    if category:
-                        stats = comp_intel.get_market_stats(category)
-                    else:
-                        # Calculate stats across all categories
-                        stats = {
-                            'avg_price_per_kg': round(df['Price_per_kg'].mean(), 2),
-                            'avg_co2_emission': round(df['CO2_Emission_kg'].mean(), 2),
-                            'competitor_count': len(df),
-                            'price_range': {
-                                'min': round(df['Price_per_kg'].min(), 2),
-                                'max': round(df['Price_per_kg'].max(), 2)
-                            }
+                    # Calculate stats from DataFrame
+                    stats = {
+                        'avg_price_per_kg': round(df['Price_per_kg'].mean(), 2),
+                        'avg_co2_emission': round(df['CO2_Emission_kg'].mean(), 2),
+                        'competitor_count': len(df),
+                        'price_range': {
+                            'min': round(df['Price_per_kg'].min(), 2),
+                            'max': round(df['Price_per_kg'].max(), 2)
                         }
+                    }
 
                     with col1:
                         st.metric("Avg Price/kg", f"${stats['avg_price_per_kg']}")
@@ -227,10 +232,20 @@ if analyze_button and product_concept:
 
                     # Competitor table
                     st.markdown("#### 📋 Competitor Landscape")
+
+                    # Display table with source links
+                    display_df = df[['Company', 'Product', 'Price_per_kg', 'CO2_Emission_kg', 'Marketing_Claim', 'Source']].copy()
                     st.dataframe(
-                        df[['Company', 'Product', 'Price_per_kg', 'CO2_Emission_kg', 'Marketing_Claim']],
-                        use_container_width=True,
-                        hide_index=True
+                        display_df,
+                        width='stretch',
+                        hide_index=True,
+                        column_config={
+                            "Source": st.column_config.LinkColumn(
+                                "Source",
+                                help="Click to view source",
+                                display_text="🔗 View"
+                            )
+                        }
                     )
 
                     # Visualizations
@@ -247,7 +262,7 @@ if analyze_button and product_concept:
                             color_continuous_scale='Viridis'
                         )
                         fig_price.update_layout(showlegend=False)
-                        st.plotly_chart(fig_price, use_container_width=True)
+                        st.plotly_chart(fig_price, width='stretch')
 
                     with col2:
                         # CO2 comparison
@@ -260,7 +275,7 @@ if analyze_button and product_concept:
                             color_continuous_scale='RdYlGn_r'
                         )
                         fig_co2.update_layout(showlegend=False)
-                        st.plotly_chart(fig_co2, use_container_width=True)
+                        st.plotly_chart(fig_co2, width='stretch')
 
                     # Price vs CO2 scatter
                     fig_scatter = px.scatter(
@@ -273,7 +288,7 @@ if analyze_button and product_concept:
                         title='Price vs Environmental Impact',
                         labels={'CO2_Emission_kg': 'CO₂ Emissions (kg)', 'Price_per_kg': 'Price ($/kg)'}
                     )
-                    st.plotly_chart(fig_scatter, use_container_width=True)
+                    st.plotly_chart(fig_scatter, width='stretch')
 
                 else:
                     st.warning("No competitor data available. Check API configuration.")
