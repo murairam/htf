@@ -6,16 +6,13 @@ OPTIMIZED RAG Engine - Reduces API calls by 80%
 """
 
 import os
-<<<<<<< HEAD
-import time
-from typing import List, Dict, Tuple
-=======
 import hashlib
+import time
 from typing import List, Dict, Tuple, Optional
->>>>>>> mari
 from pathlib import Path
 from dotenv import load_dotenv
 import json
+import logging
 
 from llama_index.core import (
     VectorStoreIndex,
@@ -25,24 +22,19 @@ from llama_index.core import (
     Settings,
     Document
 )
-<<<<<<< HEAD
-from llama_index.core.node_parser import SimpleNodeParser
-from llama_index.llms.openai import OpenAI
-from llama_index.llms.anthropic import Anthropic
-=======
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.llms.openai import OpenAI
->>>>>>> mari
 from llama_index.embeddings.openai import OpenAIEmbedding
+
+# Import our rate-limited embedding wrapper
+from rate_limited_embedding import RateLimitedEmbedding
 
 # Load environment variables
 load_dotenv()
 
-# Import logger
-from logger import get_logger
-
-# Initialize logger
-logger = get_logger(__name__)
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class OptimizedRAGEngine:
@@ -59,41 +51,28 @@ class OptimizedRAGEngine:
         self.index = None
         self.query_engine = None
 
-<<<<<<< HEAD
-        # Configure LLM and embeddings with rate limiting
-=======
         # Query cache to avoid repeated API calls
         self.query_cache = {}
         self._load_query_cache()
 
->>>>>>> mari
         self._setup_llm()
-        self._setup_embeddings()
-
-    def _setup_embeddings(self):
-        """Configure embeddings with smaller batch sizes to avoid rate limits."""
-        # Use very small embed batch size to avoid rate limits
-        # With 40K TPM limit and ~500 tokens per chunk, we can do about 3-4 chunks per batch
-        Settings.embed_model = OpenAIEmbedding(
-            model="text-embedding-ada-002",
-            embed_batch_size=3,  # Very small to stay under 40K token limit
-        )
-
-        # Set smaller chunk size to reduce tokens per request
-        Settings.chunk_size = 400  # Small chunks to stay under rate limits
-        Settings.chunk_overlap = 40
 
     def _setup_llm(self):
-        """Configure LLM with optimized settings."""
+        """Configure LLM with optimized settings and aggressive rate limiting."""
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OPENAI_API_KEY not found")
 
-        # Use smaller, cheaper embedding model
-        Settings.embed_model = OpenAIEmbedding(
-            model="text-embedding-3-small",  # Cheaper than ada-002
-            api_key=api_key
+        # Use our custom rate-limited embedding wrapper
+        # This adds 2-second delays between requests to prevent rate limits
+        Settings.embed_model = RateLimitedEmbedding(
+            model="text-embedding-3-small",  # Cheaper and more efficient than ada-002
+            api_key=api_key,
+            delay_seconds=2.0,  # Wait 2 seconds between requests
+            embed_batch_size=5  # Very conservative batch size
         )
+        
+        logger.info("✓ Using rate-limited embedding with 2s delays between requests")
 
         # Use GPT-4o-mini for cheaper queries (can upgrade to gpt-4o for final demo)
         Settings.llm = OpenAI(
@@ -102,11 +81,13 @@ class OptimizedRAGEngine:
             temperature=0.1
         )
 
-        # Optimize chunk size to reduce embeddings
+        # Optimize chunk size to reduce embeddings - smaller chunks = fewer tokens per request
         Settings.node_parser = SentenceSplitter(
-            chunk_size=512,  # Smaller chunks = fewer tokens
-            chunk_overlap=50
+            chunk_size=300,  # REDUCED from 400 to 300 - even smaller chunks
+            chunk_overlap=30  # Reduced overlap
         )
+        
+        logger.info("✓ Chunk size: 300 tokens, overlap: 30 tokens")
 
     def _load_query_cache(self):
         """Load cached queries from disk."""
@@ -115,12 +96,8 @@ class OptimizedRAGEngine:
             try:
                 with open(cache_file, 'r') as f:
                     self.query_cache = json.load(f)
-                logger.info(f"Loaded {len(self.query_cache)} cached queries from disk")
-            except json.JSONDecodeError as e:
-                logger.warning(f"Failed to parse query cache JSON: {e}")
-                self.query_cache = {}
-            except IOError as e:
-                logger.error(f"Failed to read query cache file: {e}")
+                print(f"📦 Loaded {len(self.query_cache)} cached queries")
+            except:
                 self.query_cache = {}
 
     def _save_query_cache(self):
@@ -133,32 +110,26 @@ class OptimizedRAGEngine:
         """Generate hash for query caching."""
         return hashlib.md5(query.encode()).hexdigest()
 
-
-    def initialize_index(self, force_reload: bool = False) -> bool:
+    def initialize_index(self, force_reload: bool = False, max_retries: int = 3) -> bool:
         """
-        Load or create index with optimizations.
+        Load or create index with optimizations and rate limit handling.
         """
         try:
             # Try to load existing index first
             if not force_reload and self.persist_dir.exists():
-                logger.info("Loading existing index from storage...")
+                logger.info("📚 Loading existing index...")
                 storage_context = StorageContext.from_defaults(
                     persist_dir=str(self.persist_dir)
                 )
                 self.index = load_index_from_storage(storage_context)
-                logger.info("Index loaded successfully (no API calls needed)")
+                logger.info("✓ Index loaded (no API calls needed!)")
             else:
-                logger.info(f"Building optimized index from {self.data_dir}...")
+                logger.info(f"📄 Building optimized index from {self.data_dir}...")
 
                 if not self.data_dir.exists():
                     raise FileNotFoundError(f"Data directory not found: {self.data_dir}")
 
-<<<<<<< HEAD
                 # Load documents
-                print("📥 Loading documents (this may take a while due to rate limits)...")
-=======
-                # Load documents with smaller chunks
->>>>>>> mari
                 documents = SimpleDirectoryReader(
                     str(self.data_dir),
                     required_exts=[".pdf"]
@@ -167,42 +138,38 @@ class OptimizedRAGEngine:
                 if not documents:
                     raise ValueError(f"No PDF files found in {self.data_dir}")
 
-<<<<<<< HEAD
-                print(f"✓ Loaded {len(documents)} documents")
-                print("⏳ Creating embeddings (processing in small batches to avoid rate limits)...")
-                print("   This will take several minutes. Please be patient...")
+                logger.info(f"✓ Loaded {len(documents)} documents")
 
-                # Process documents in small batches to avoid rate limits
-                # Create index from first batch
-                batch_size = 5  # Process 5 documents at a time
-                batches = [documents[i:i + batch_size] for i in range(0, len(documents), batch_size)]
-
-                print(f"   Processing {len(batches)} batches...")
-
-                # Create initial index with first batch
-=======
-                logger.info(f"Loaded {len(documents)} PDF documents")
-
-                # Process in smaller batches to avoid rate limits
-                logger.info("Creating vector index with optimized chunk size...")
->>>>>>> mari
-                self.index = VectorStoreIndex.from_documents(
-                    batches[0],
-                    show_progress=True
-                )
-                print(f"   ✓ Batch 1/{len(batches)} complete")
-
-                # Add remaining batches with delays
-                for i, batch in enumerate(batches[1:], start=2):
-                    time.sleep(2)  # 2 second delay between batches
-                    for doc in batch:
-                        self.index.insert(doc)
-                    print(f"   ✓ Batch {i}/{len(batches)} complete")
+                # Create index with retry logic for rate limits
+                logger.info("⚙️ Creating index with optimized settings...")
+                
+                retry_count = 0
+                while retry_count < max_retries:
+                    try:
+                        self.index = VectorStoreIndex.from_documents(
+                            documents,
+                            show_progress=True
+                        )
+                        break  # Success!
+                        
+                    except Exception as e:
+                        error_msg = str(e).lower()
+                        if "rate_limit" in error_msg or "429" in error_msg:
+                            retry_count += 1
+                            if retry_count < max_retries:
+                                wait_time = 10 * retry_count  # Exponential backoff
+                                logger.warning(f"⚠️ Rate limit hit (attempt {retry_count}/{max_retries}). Waiting {wait_time} seconds...")
+                                time.sleep(wait_time)
+                            else:
+                                logger.error("❌ Max retries reached. Please try again later or reduce the number of PDFs.")
+                                raise
+                        else:
+                            raise
 
                 # Persist for future use
                 self.persist_dir.mkdir(exist_ok=True)
                 self.index.storage_context.persist(persist_dir=str(self.persist_dir))
-                logger.info(f"Index saved to {self.persist_dir}")
+                logger.info(f"✓ Index saved to {self.persist_dir}")
 
             # Create query engine
             self.query_engine = self.index.as_query_engine(
@@ -212,17 +179,8 @@ class OptimizedRAGEngine:
 
             return True
 
-        except FileNotFoundError as e:
-            logger.error(f"Data directory or files not found: {e}")
-            raise
-        except ValueError as e:
-            logger.error(f"Invalid data or configuration: {e}")
-            raise
-        except (ConnectionError, TimeoutError) as e:
-            logger.error(f"API connection error during index creation: {e}")
-            raise
         except Exception as e:
-            logger.error(f"Unexpected error initializing index: {e}", exc_info=True)
+            logger.error(f"✗ Error: {str(e)}")
             raise
 
     def get_cited_answer(self, query: str, use_cache: bool = True) -> Tuple[str, List[Dict]]:
@@ -235,7 +193,7 @@ class OptimizedRAGEngine:
         # Check cache first
         query_hash = self._get_query_hash(query)
         if use_cache and query_hash in self.query_cache:
-            logger.info("Cache hit: Using cached query result (no API call)")
+            print("💾 Using cached result (no API call)")
             cached = self.query_cache[query_hash]
             return cached['answer'], cached['citations']
 
@@ -271,59 +229,9 @@ class OptimizedRAGEngine:
 
             return answer, citations
 
-        except (ConnectionError, TimeoutError) as e:
-            logger.error(f"API connection error during query: {e}")
-            raise
-        except ValueError as e:
-            logger.error(f"Invalid query or response format: {e}")
-            raise
         except Exception as e:
-            logger.error(f"Unexpected error during query: {e}", exc_info=True)
+            print(f"✗ Error: {str(e)}")
             raise
-
-    def query(self, query_str: str):
-        """
-        Query the index and return a response object.
-        This method provides compatibility with different interfaces.
-
-        Args:
-            query_str: The question to ask
-
-        Returns:
-            Response object with .response attribute and .source_nodes
-        """
-        if not self.query_engine:
-            raise RuntimeError("Index not initialized. Call initialize_index() first.")
-
-        return self.query_engine.query(query_str)
-
-    def get_citations(self, response) -> List[Dict]:
-        """
-        Extract citations from a response object.
-
-        Args:
-            response: Query response object
-
-        Returns:
-            List of citation dictionaries
-        """
-        citations = []
-        if hasattr(response, 'source_nodes'):
-            for i, node in enumerate(response.source_nodes):
-                metadata = node.node.metadata if hasattr(node.node, 'metadata') else {}
-                file_name = metadata.get('file_name', 'Unknown')
-                if file_name != 'Unknown':
-                    file_name = Path(file_name).stem
-
-                citation = {
-                    "source_id": i + 1,
-                    "file_name": file_name,
-                    "page": metadata.get('page_label', 'N/A'),
-                    "relevance_score": round(node.score, 3) if hasattr(node, 'score') else None,
-                    "excerpt": node.node.text[:200] + "..." if len(node.node.text) > 200 else node.node.text
-                }
-                citations.append(citation)
-        return citations
 
     def get_marketing_strategy(
         self,
@@ -356,7 +264,6 @@ Cite specific research findings."""
 
     def clear_cache(self):
         """Clear query cache to force fresh API calls."""
-        cache_size = len(self.query_cache)
         self.query_cache = {}
         self._save_query_cache()
-        logger.info(f"Query cache cleared ({cache_size} entries removed)")
+        print("🗑️ Cache cleared")

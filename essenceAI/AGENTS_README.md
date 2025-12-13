@@ -1,387 +1,522 @@
-# Agent System Documentation
+# 🤖 essenceAI Agent System
 
-## Overview
+A multi-agent framework for autonomous market intelligence tasks in the sustainable food sector.
 
-The essenceAI agent system provides intelligent automation for market research, competitor analysis, and technical tasks. It consists of specialized agents that can work independently or be coordinated for complex workflows.
+## 📋 Overview
 
-## Architecture
+The essenceAI agent system provides specialized AI agents that work together to deliver comprehensive market intelligence:
 
-### Components
+- **Research Agent**: Analyzes scientific papers and extracts research-backed insights
+- **Competitor Agent**: Gathers and analyzes real-time competitor intelligence
+- **Marketing Agent**: Generates marketing strategies based on consumer psychology
+- **Agent Orchestrator**: Coordinates multiple agents for complex workflows
 
-1. **Blackbox AI Client** (`src/blackbox_client.py`)
-   - API wrapper for Blackbox AI
-   - Handles code generation, analysis, and data processing
-   - Implements caching to reduce API costs
+## 🏗️ Architecture
 
-2. **Agent System** (`src/agents.py`)
-   - Base agent framework
-   - Specialized agent implementations
-   - Task management and coordination
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Agent Orchestrator                        │
+│              (Coordinates multi-agent workflows)             │
+└─────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
+┌──────────────┐      ┌──────────────┐     ┌──────────────┐
+│   Research   │      │  Competitor  │     │  Marketing   │
+│    Agent     │      │    Agent     │     │    Agent     │
+├──────────────┤      ├──────────────┤     ├──────────────┤
+│ • RAG Engine │      │ • Tavily API │     │ • Psychology │
+│ • Citations  │      │ • OpenAI     │     │ • Segments   │
+│ • PDFs       │      │ • Real-time  │     │ • Strategy   │
+└──────────────┘      └──────────────┘     └──────────────┘
+```
 
-3. **Agent Manager**
-   - Coordinates multiple agents
-   - Manages task queue and execution
-   - Tracks system statistics
+## 🚀 Quick Start
 
-## Available Agents
+### 1. Basic Setup
 
-### 1. CompetitorAgent
-
-**Purpose:** Market research and competitor analysis
-
-**Capabilities:**
-- `competitor_research`: Find and analyze competitors
-- `market_analysis`: Comprehensive market landscape analysis
-- `pricing_analysis`: Pricing strategy analysis and recommendations
-- `competitor_comparison`: Compare specific competitors
-
-**Example Usage:**
 ```python
-from agents import get_agent_manager
+from agents import AgentOrchestrator
 
-manager = get_agent_manager()
+# Initialize orchestrator
+orchestrator = AgentOrchestrator(data_dir="data", persist_dir=".storage")
 
-# Create competitor research task
-task = manager.create_task(
-    task_type="competitor_research",
-    description="Research plant-based burger competitors",
-    parameters={
-        "product_concept": "Plant-based burger for fast-food",
-        "category": "Plant-Based",
-        "max_results": 10
+# Initialize research database (first time only)
+orchestrator.initialize_research()
+```
+
+### 2. Run Full Analysis
+
+```python
+# Execute complete market intelligence analysis
+result = orchestrator.execute_full_analysis(
+    product_description="Precision fermented artisan cheese",
+    domain="Precision Fermentation",
+    segment="Skeptic"
+)
+
+if result['status'] == 'success':
+    data = result['data']
+    print(f"Competitors found: {data['competitor_intelligence']['count']}")
+    print(f"Research citations: {len(data['research_insights']['citations'])}")
+    print(f"Marketing strategy: {data['marketing_strategy']['segment']}")
+```
+
+### 3. Quick Analysis (One-liner)
+
+```python
+from agents.orchestrator import quick_analysis
+
+result = quick_analysis(
+    product_description="Algae-based protein bar",
+    domain="Algae",
+    segment="High Essentialist"
+)
+```
+
+## 🎯 Individual Agents
+
+### Research Agent
+
+Analyzes scientific papers using RAG (Retrieval-Augmented Generation).
+
+```python
+from agents import ResearchAgent
+
+# Initialize
+research_agent = ResearchAgent(data_dir="data")
+research_agent.initialize()
+
+# Query research papers
+result = research_agent.execute({
+    'query': 'What are consumer acceptance factors for plant-based meat?',
+    'domain': 'Plant-Based',
+    'segment': 'High Essentialist'
+})
+
+# Specialized methods
+acceptance = research_agent.analyze_consumer_acceptance("Plant-Based", "Skeptic")
+insights = research_agent.get_marketing_insights("Algae", "Non-Consumer")
+barriers = research_agent.identify_barriers("Precision Fermentation")
+```
+
+**Key Features:**
+- ✅ Cites scientific sources
+- ✅ Extracts research insights
+- ✅ Analyzes consumer acceptance
+- ✅ Identifies barriers
+
+### Competitor Agent
+
+Gathers real-time market intelligence.
+
+```python
+from agents import CompetitorAgent
+
+competitor_agent = CompetitorAgent()
+
+# Basic competitor analysis
+result = competitor_agent.execute({
+    'product_description': 'Plant-based burger',
+    'domain': 'Plant-Based',
+    'max_competitors': 10
+})
+
+# Specialized analyses
+pricing = competitor_agent.analyze_pricing("Plant-based burger", "Plant-Based")
+sustainability = competitor_agent.analyze_sustainability("Algae protein", "Algae")
+gaps = competitor_agent.find_market_gaps("Fermented cheese", "Precision Fermentation")
+```
+
+**Key Features:**
+- ✅ Real-time competitor data
+- ✅ Pricing analysis
+- ✅ Sustainability metrics (CO2)
+- ✅ Market gap identification
+
+### Marketing Agent
+
+Generates marketing strategies based on consumer psychology.
+
+```python
+from agents import MarketingAgent
+
+marketing_agent = MarketingAgent()
+
+# Generate strategy for specific segment
+result = marketing_agent.execute({
+    'product_description': 'Precision fermented ice cream',
+    'segment': 'High Essentialist',
+    'domain': 'Precision Fermentation',
+    'competitor_data': {},  # Optional
+    'research_insights': {}  # Optional
+})
+
+# Compare across all segments
+comparison = marketing_agent.compare_segments(
+    product="Plant-based chicken nuggets",
+    domain="Plant-Based"
+)
+```
+
+**Key Features:**
+- ✅ Segment-specific strategies
+- ✅ Positioning & messaging
+- ✅ Channel recommendations
+- ✅ Tactical guidance
+
+**Available Segments:**
+- **High Essentialist**: Values sensory mimicry
+- **Skeptic**: Values naturalness and transparency
+- **Non-Consumer**: Fears unfamiliar foods
+
+## 🎼 Orchestrator Workflows
+
+### Full Analysis
+
+Complete market intelligence using all agents.
+
+```python
+result = orchestrator.execute_full_analysis(
+    product_description="Algae-based omega-3 supplement",
+    domain="Algae",
+    segment="Skeptic"
+)
+```
+
+**Workflow:**
+1. Competitor Agent → Gather market data
+2. Research Agent → Extract scientific insights
+3. Marketing Agent → Generate strategy
+
+### Competitor Deep Dive
+
+Comprehensive competitor analysis.
+
+```python
+result = orchestrator.execute_competitor_analysis(
+    product_description="Plant-based yogurt",
+    domain="Plant-Based",
+    include_pricing=True,
+    include_sustainability=True,
+    include_gaps=True
+)
+```
+
+### Research Deep Dive
+
+Comprehensive research analysis.
+
+```python
+result = orchestrator.execute_research_analysis(
+    domain="Precision Fermentation",
+    segment="High Essentialist",
+    include_acceptance=True,
+    include_barriers=True,
+    include_marketing=True
+)
+```
+
+### Segment Comparison
+
+Compare strategies across all consumer segments.
+
+```python
+result = orchestrator.execute_segment_comparison(
+    product_description="Fermented dairy alternative",
+    domain="Precision Fermentation"
+)
+```
+
+## 📊 Response Format
+
+All agents return standardized responses:
+
+```python
+{
+    'status': 'success',  # or 'error'
+    'agent': 'AgentName',
+    'message': 'Task completed successfully',
+    'data': {
+        # Agent-specific results
     },
-    priority=8
-)
-
-# Execute task
-result = manager.execute_task(task.task_id)
-
-# Access results
-if result.status == TaskStatus.COMPLETED:
-    competitors = result.result['competitors']
-    print(f"Found {len(competitors)} competitors")
+    'timestamp': '2025-12-13T10:30:00'
+}
 ```
 
-### 2. CodeAgent
+## 🔧 Configuration
 
-**Purpose:** Code generation and technical automation
+### Agent Configuration
 
-**Capabilities:**
-- `generate_code`: Generate code from natural language descriptions
-- `analyze_code`: Review code for best practices and issues
-- `optimize_code`: Suggest code optimizations
-- `debug_code`: Debug code and identify issues
-- `data_processing`: Process and analyze data
-
-**Example Usage:**
 ```python
-# Generate code
-task = manager.create_task(
-    task_type="generate_code",
-    description="Create CO2 calculator function",
-    parameters={
-        "prompt": "Create a Python function to calculate CO2 savings",
-        "language": "python"
-    }
-)
+from agents.agent_config import AgentConfig
 
-result = manager.execute_task(task.task_id)
-generated_code = result.result['code']
-
-# Analyze code
-task = manager.create_task(
-    task_type="analyze_code",
-    description="Review pricing function",
-    parameters={
-        "code": my_code,
-        "analysis_type": "review"  # or "optimize", "debug", "explain"
-    }
+config = AgentConfig(
+    data_dir="data",
+    persist_dir=".storage",
+    llm_provider="openai",  # or "anthropic"
+    temperature=0.1,
+    max_competitors=10,
+    max_citations=5,
+    verbose=True
 )
 ```
 
-## Setup
+### Environment Variables
 
-### 1. Install Dependencies
+Create a `.env` file:
 
 ```bash
-pip install -r requirements.txt
+# Required
+OPENAI_API_KEY=sk-your-key-here
+
+# Optional
+TAVILY_API_KEY=tvly-your-key-here
+ANTHROPIC_API_KEY=sk-ant-your-key-here
+
+# LLM Provider
+LLM_PROVIDER=openai  # or "anthropic"
 ```
 
-### 2. Configure API Keys
+## 📚 Examples
 
-Copy `.env.example` to `.env` and add your API keys:
+See `examples/agent_usage_examples.py` for comprehensive examples:
 
 ```bash
-cp .env.example .env
+cd essenceAI
+python examples/agent_usage_examples.py
 ```
 
-Edit `.env`:
-```
-OPENAI_API_KEY=your_openai_key
-TAVILY_API_KEY=your_tavily_key  # Optional
-BLACKBOX_API_KEY=your_blackbox_key  # Required for CodeAgent
-```
+**Available Examples:**
+1. Individual Agents
+2. Full Analysis with Orchestrator
+3. Deep Dive Competitor Analysis
+4. Segment Comparison
+5. Quick Analysis Function
+6. Agent Status and Capabilities
+7. Custom Workflow
 
-**Getting API Keys:**
-- OpenAI: https://platform.openai.com/api-keys
-- Tavily: https://tavily.com (optional, for real-time web search)
-- Blackbox AI: https://www.blackbox.ai/api
+## 🧪 Testing
 
-### 3. Test the System
+Run agent tests:
 
 ```bash
-python test_agents.py
+cd essenceAI
+pytest tests/test_agents.py -v
 ```
 
-## Task Management
+## 🎯 Use Cases
 
-### Creating Tasks
+### 1. Product Launch Planning
 
 ```python
-from agents import get_agent_manager
-
-manager = get_agent_manager()
-
-task = manager.create_task(
-    task_type="competitor_research",  # Task type
-    description="Research competitors",  # Human-readable description
-    parameters={  # Task-specific parameters
-        "product_concept": "...",
-        "category": "Plant-Based"
-    },
-    priority=5  # 1-10, higher = more important
+# Analyze market before launching new product
+result = orchestrator.execute_full_analysis(
+    product_description="Precision fermented mozzarella for pizza chains",
+    domain="Precision Fermentation",
+    segment="High Essentialist"
 )
+
+# Get competitor landscape
+competitors = result['data']['competitor_intelligence']
+
+# Get research-backed strategy
+strategy = result['data']['marketing_strategy']
 ```
 
-### Task Status
-
-Tasks go through these states:
-- `PENDING`: Created but not started
-- `RUNNING`: Currently being executed
-- `COMPLETED`: Successfully finished
-- `FAILED`: Execution failed
-- `CANCELLED`: Manually cancelled
-
-### Accessing Results
+### 2. Competitive Intelligence
 
 ```python
-# Execute task
-result = manager.execute_task(task.task_id)
+# Monitor competitor landscape
+result = orchestrator.execute_competitor_analysis(
+    product_description="Plant-based protein powder",
+    domain="Plant-Based",
+    include_pricing=True,
+    include_sustainability=True,
+    include_gaps=True
+)
 
-# Check status
-if result.status == TaskStatus.COMPLETED:
-    # Access result data
-    data = result.result
-
-    # View logs
-    for log in result.logs:
-        print(log)
-else:
-    # Handle error
-    print(f"Error: {result.error}")
+# Identify market opportunities
+gaps = result['market_gaps']['data']
 ```
 
-## System Statistics
+### 3. Marketing Strategy Development
 
 ```python
-# Get overall system stats
-stats = manager.get_system_stats()
-print(f"Total agents: {stats['total_agents']}")
-print(f"Tasks completed: {stats['tasks_completed']}")
+# Compare strategies across segments
+result = orchestrator.execute_segment_comparison(
+    product_description="Algae-based snack bar",
+    domain="Algae"
+)
 
-# Get agent-specific stats
-for agent_stat in stats['agents']:
-    print(f"{agent_stat['name']}: {agent_stat['tasks_completed']} completed")
+# Choose best segment to target
+for segment, strategy in result['data'].items():
+    print(f"{segment}: {strategy['positioning']}")
 ```
 
-## Advanced Usage
-
-### Custom Task Parameters
-
-#### CompetitorAgent Parameters
-
-**competitor_research:**
-```python
-{
-    "product_concept": str,  # Product description
-    "category": str,  # "Plant-Based", "Precision Fermentation", "Algae"
-    "max_results": int  # Number of competitors to find
-}
-```
-
-**market_analysis:**
-```python
-{
-    "product_concept": str,
-    "category": str,
-    "max_results": int
-}
-```
-
-**pricing_analysis:**
-```python
-{
-    "product_concept": str,
-    "category": str,
-    "max_results": int
-}
-```
-
-**competitor_comparison:**
-```python
-{
-    "product_concept": str,
-    "category": str,
-    "competitor_names": List[str]  # Specific companies to compare
-}
-```
-
-#### CodeAgent Parameters
-
-**generate_code:**
-```python
-{
-    "prompt": str,  # Code generation prompt
-    "language": str  # "python", "javascript", etc.
-}
-```
-
-**analyze_code:**
-```python
-{
-    "code": str,  # Code to analyze
-    "analysis_type": str  # "review", "optimize", "debug", "explain"
-}
-```
-
-**data_processing:**
-```python
-{
-    "data": Any,  # Data to process (dict, list, etc.)
-    "task": str  # Processing task description
-}
-```
-
-## Caching
-
-Both agents implement intelligent caching:
-
-- **CompetitorAgent**: Caches competitor data in SQLite database (24h default)
-- **CodeAgent**: Caches Blackbox AI responses to disk
-
-This reduces API costs by 80-90% for repeated queries.
-
-### Clear Cache
+### 4. Research Insights
 
 ```python
-# Clear Blackbox AI cache
-from blackbox_client import get_blackbox_client
-client = get_blackbox_client()
-client.clear_cache()
+# Extract research insights for specific domain
+result = orchestrator.execute_research_analysis(
+    domain="Precision Fermentation",
+    segment="Skeptic",
+    include_acceptance=True,
+    include_barriers=True,
+    include_marketing=True
+)
 
-# Clear competitor cache
-from competitor_data import OptimizedCompetitorIntelligence
-intel = OptimizedCompetitorIntelligence()
-# Cache is automatically managed by database
+# Get cited recommendations
+insights = result['research_insights']['data']
 ```
 
-## Error Handling
+## 🔍 Agent Status & History
 
-Agents handle errors gracefully:
+### Check Agent Status
 
 ```python
-result = manager.execute_task(task_id)
-
-if result.status == TaskStatus.FAILED:
-    print(f"Task failed: {result.error}")
-
-    # Check logs for details
-    for log in result.logs:
-        print(log)
+status = orchestrator.get_agent_status()
+print(status)
 ```
 
-Common errors:
-- Missing API keys
-- Network issues
-- Invalid parameters
-- Rate limits
-
-## Performance Tips
-
-1. **Use Caching**: Enable caching for repeated queries
-2. **Batch Tasks**: Create multiple tasks and execute in sequence
-3. **Set Priorities**: Higher priority tasks execute first
-4. **Monitor Stats**: Track API usage to optimize costs
-
-## Integration with Streamlit App
-
-The agent system can be integrated into the main Streamlit app:
+### View Workflow History
 
 ```python
-import streamlit as st
-from agents import get_agent_manager
-
-# Initialize manager
-manager = get_agent_manager()
-
-# Create task from user input
-if st.button("Analyze Competitors"):
-    task = manager.create_task(
-        task_type="competitor_research",
-        description=f"Research {product_concept}",
-        parameters={
-            "product_concept": product_concept,
-            "category": category,
-            "max_results": 10
-        }
-    )
-
-    # Execute and show results
-    with st.spinner("Analyzing competitors..."):
-        result = manager.execute_task(task.task_id)
-
-    if result.status == TaskStatus.COMPLETED:
-        st.success("Analysis complete!")
-        st.json(result.result)
+history = orchestrator.get_workflow_history()
+for workflow in history:
+    print(f"Workflow {workflow['id']}: {workflow['product']}")
+    print(f"  Steps: {len(workflow['steps'])}")
 ```
 
-## Troubleshooting
+### Clear History
 
-### "BLACKBOX_API_KEY not found"
-- Add your Blackbox AI API key to `.env` file
-- CodeAgent requires this key to function
+```python
+orchestrator.clear_history()
+```
 
-### "No available agent can handle this task"
-- Check task_type matches available agent capabilities
-- Ensure agent is not busy with another task
+## 🚧 Advanced Usage
 
-### "API connection error"
-- Check internet connection
-- Verify API keys are valid
-- Check API service status
+### Custom Workflow
 
-### Cache issues
-- Delete `.cache` directory to clear all caches
-- Check disk space for cache storage
+Build your own multi-agent workflow:
 
-## Future Enhancements
+```python
+from agents import ResearchAgent, CompetitorAgent, MarketingAgent
 
-Planned features:
-- [ ] More specialized agents (MarketingAgent, ResearchAgent)
-- [ ] Multi-agent coordination for complex workflows
-- [ ] Task dependencies and pipelines
-- [ ] Real-time progress updates
-- [ ] Agent learning from past tasks
-- [ ] Custom agent creation API
+# Initialize agents
+research = ResearchAgent(data_dir="data")
+competitor = CompetitorAgent()
+marketing = MarketingAgent()
 
-## Support
+# Step 1: Research
+research.initialize()
+research_result = research.analyze_consumer_acceptance("Plant-Based", "Skeptic")
+
+# Step 2: Competitors
+competitor_result = competitor.execute({
+    'product_description': 'Plant-based burger',
+    'domain': 'Plant-Based'
+})
+
+# Step 3: Marketing
+marketing_result = marketing.execute({
+    'product_description': 'Plant-based burger',
+    'segment': 'Skeptic',
+    'domain': 'Plant-Based',
+    'competitor_data': competitor_result.get('data', {}),
+    'research_insights': research_result.get('data', {})
+})
+```
+
+### Parallel Execution (Future)
+
+```python
+# Coming soon: Parallel agent execution
+config = AgentConfig(enable_parallel_execution=True)
+```
+
+## 📖 API Reference
+
+### BaseAgent
+
+All agents inherit from `BaseAgent`:
+
+```python
+class BaseAgent(ABC):
+    def execute(self, task: Dict[str, Any]) -> Dict[str, Any]
+    def log_action(self, action: str, details: Dict[str, Any])
+    def get_history(self) -> List[Dict[str, Any]]
+    def clear_history()
+    def get_status() -> Dict[str, Any]
+```
+
+### ResearchAgent
+
+```python
+class ResearchAgent(BaseAgent):
+    def initialize(self, force_reload: bool = False) -> bool
+    def execute(self, task: Dict[str, Any]) -> Dict[str, Any]
+    def analyze_consumer_acceptance(self, domain: str, segment: Optional[str]) -> Dict
+    def get_marketing_insights(self, domain: str, segment: str) -> Dict
+    def identify_barriers(self, domain: str) -> Dict
+    def get_available_papers(self) -> List[str]
+```
+
+### CompetitorAgent
+
+```python
+class CompetitorAgent(BaseAgent):
+    def execute(self, task: Dict[str, Any]) -> Dict[str, Any]
+    def analyze_pricing(self, product: str, domain: Optional[str]) -> Dict
+    def analyze_sustainability(self, product: str, domain: Optional[str]) -> Dict
+    def find_market_gaps(self, product: str, domain: Optional[str]) -> Dict
+```
+
+### MarketingAgent
+
+```python
+class MarketingAgent(BaseAgent):
+    def execute(self, task: Dict[str, Any]) -> Dict[str, Any]
+    def get_segment_profiles(self) -> Dict[str, Dict[str, Any]]
+    def compare_segments(self, product: str, domain: Optional[str]) -> Dict
+```
+
+### AgentOrchestrator
+
+```python
+class AgentOrchestrator:
+    def initialize_research(self, force_reload: bool = False) -> bool
+    def execute_full_analysis(self, product: str, domain: Optional[str], segment: Optional[str]) -> Dict
+    def execute_competitor_analysis(self, product: str, domain: Optional[str], ...) -> Dict
+    def execute_research_analysis(self, domain: str, segment: Optional[str], ...) -> Dict
+    def execute_segment_comparison(self, product: str, domain: Optional[str]) -> Dict
+    def get_agent_status(self) -> Dict[str, Any]
+    def get_workflow_history(self) -> List[Dict[str, Any]]
+    def clear_history()
+```
+
+## 🤝 Contributing
+
+To add a new agent:
+
+1. Create a new file in `src/agents/`
+2. Inherit from `BaseAgent`
+3. Implement the `execute()` method
+4. Add to `__init__.py`
+5. Update orchestrator if needed
+
+## 📝 License
+
+Part of the essenceAI project - Built for Hack the Fork 2025
+
+## 🆘 Support
 
 For issues or questions:
-1. Check this documentation
-2. Review `test_agents.py` for examples
-3. Check logs in `logs/` directory
-4. Review task logs for specific errors
+- Check `examples/agent_usage_examples.py`
+- Review `tests/test_agents.py`
+- See main `README.md` for project setup
 
-## License
+---
 
-Part of essenceAI - Hack the Fork 2025
+**Built with ❤️ for sustainable food innovation**
