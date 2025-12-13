@@ -250,6 +250,65 @@ Cite specific findings from the research papers."""
 
         return self.get_cited_answer(query)
 
+    def get_segment_strategy(
+        self,
+        product_concept: str,
+        target_segment: str
+    ) -> Tuple[str, List[Dict]]:
+        """
+        Get a segment-specific strategy without category restriction.
+
+        Args:
+            product_concept: Description of the product
+            target_segment: "High Essentialist", "Skeptic", or "Non-Consumer"
+
+        Returns:
+            Tuple of (strategy_text, citations)
+        """
+        query = f"""Based on the research papers about food essentialism and consumer acceptance:
+
+Product Concept: {product_concept}
+Target Consumer Segment: {target_segment}
+Domain: All sustainable food alternatives (Precision Fermentation, Plant-Based, Algae)
+
+Provide a specific marketing strategy that addresses:
+1. What psychological factors influence this segment's acceptance across all sustainable food categories?
+2. What messaging should be emphasized for this segment regardless of product type?
+3. What should be avoided in marketing to this segment?
+4. How does processing perception affect this segment's acceptance?
+
+Cite specific findings from the research papers."""
+
+        return self.get_cited_answer(query)
+
+    def get_universal_strategy(
+        self,
+        product_concept: str
+    ) -> Tuple[str, List[Dict]]:
+        """
+        Get a universal marketing strategy without category or segment restrictions.
+
+        Args:
+            product_concept: Description of the product
+
+        Returns:
+            Tuple of (strategy_text, citations)
+        """
+        query = f"""Based on the research papers about consumer acceptance of sustainable food alternatives:
+
+Product Concept: {product_concept}
+
+Provide a comprehensive, universal marketing strategy that addresses:
+1. What are the main factors influencing consumer acceptance across all sustainable food categories?
+2. What messaging approaches work best across different consumer segments?
+3. What are the universal barriers to overcome?
+4. How can the product be positioned to maximize broad market acceptance?
+5. What role do familiarity, processing perception, and labeling play?
+
+Cite specific findings from the research papers."""
+
+        return self.get_cited_answer(query)
+
     def get_consumer_insights(self, category: str) -> Tuple[str, List[Dict]]:
         """
         Get general consumer insights for a category.
