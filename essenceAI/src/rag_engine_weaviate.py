@@ -1,8 +1,7 @@
 """
-OPTIMIZED RAG Engine - Reduces API calls by 80%
-- Uses smaller chunk sizes to avoid rate limits
-- Implements aggressive caching
-- Batch processing for embeddings
+Weaviate-based RAG Engine
+Uses Weaviate Cloud as vector store - embeddings are stored remotely
+This eliminates the need to rebuild embeddings every time!
 """
 
 import os
@@ -18,15 +17,14 @@ from llama_index.core import (
     VectorStoreIndex,
     SimpleDirectoryReader,
     StorageContext,
-    load_index_from_storage,
     Settings,
     Document
 )
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.llms.openai import OpenAI
-from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.vector_stores.weaviate import WeaviateVectorStore
 
-# Import our rate-limited embedding wrapper
+# Import our rate-limited embedding
 from rate_limited_embedding import RateLimitedEmbedding
 
 # Load environment variables
@@ -37,19 +35,32 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class OptimizedRAGEngine:
+class WeaviateRAGEngine:
     """
-    Optimized RAG engine that minimizes API calls.
+    RAG engine using Weaviate Cloud for vector storage.
+    Embeddings are stored in Weaviate, so you only pay once!
     """
 
-    def __init__(self, data_dir: str = "data", persist_dir: str = ".storage", cache_dir: str = ".cache"):
+    def __init__(
+        self, 
+        data_dir: str = "data", 
+        cache_dir: str = ".cache",
+        weaviate_url: Optional[str] = None,
+        weaviate_api_key: Optional[str] = None,
+        index_name: str = "EssenceAI"
+    ):
         self.data_dir = Path(data_dir)
-        self.persist_dir = Path(persist_dir)
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(exist_ok=True)
+        
+        # Weaviate configuration
+        self.weaviate_url = weaviate_url or os.getenv("WEAVIATE_URL")
+        self.weaviate_api_key = weaviate_api_key or os.getenv("WEAVIATE_API_KEY")
+        self.index_name = index_name
 
         self.index = None
         self.query_engine = None
+        self.vector_store = None
 
         # Query cache to avoid repeated API calls
         self.query_cache = {}
@@ -58,36 +69,33 @@ class OptimizedRAGEngine:
         self._setup_llm()
 
     def _setup_llm(self):
-        """Configure LLM with optimized settings and aggressive rate limiting."""
+        """Configure LLM with rate-limited embeddings."""
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OPENAI_API_KEY not found")
 
-        # Use our custom rate-limited embedding wrapper
-        # This adds 2-second delays between requests to prevent rate limits
+        # Use rate-limited embedding wrapper
         Settings.embed_model = RateLimitedEmbedding(
-            model="text-embedding-3-small",  # Cheaper and more efficient than ada-002
+            model="text-embedding-3-small",
             api_key=api_key,
-            delay_seconds=2.0,  # Wait 2 seconds between requests
-            embed_batch_size=5  # Very conservative batch size
+            delay_seconds=2.0,  # 2 second delay between requests
+            embed_batch_size=5
         )
         
-        logger.info("✓ Using rate-limited embedding with 2s delays between requests")
+        logger.info("✓ Using rate-limited embedding (2s delays)")
 
-        # Use GPT-4o-mini for cheaper queries (can upgrade to gpt-4o for final demo)
+        # Use GPT-4o-mini for queries
         Settings.llm = OpenAI(
-            model="gpt-4o-mini",  # Much cheaper than gpt-4o
+            model="gpt-4o-mini",
             api_key=api_key,
             temperature=0.1
         )
 
-        # Optimize chunk size to reduce embeddings - smaller chunks = fewer tokens per request
+        # Smaller chunks
         Settings.node_parser = SentenceSplitter(
-            chunk_size=300,  # REDUCED from 400 to 300 - even smaller chunks
-            chunk_overlap=30  # Reduced overlap
+            chunk_size=300,
+            chunk_overlap=30
         )
-        
-        logger.info("✓ Chunk size: 300 tokens, overlap: 30 tokens")
 
     def _load_query_cache(self):
         """Load cached queries from disk."""
@@ -96,7 +104,7 @@ class OptimizedRAGEngine:
             try:
                 with open(cache_file, 'r') as f:
                     self.query_cache = json.load(f)
-                print(f"📦 Loaded {len(self.query_cache)} cached queries")
+                logger.info(f"📦 Loaded {len(self.query_cache)} cached queries")
             except:
                 self.query_cache = {}
 
@@ -110,21 +118,85 @@ class OptimizedRAGEngine:
         """Generate hash for query caching."""
         return hashlib.md5(query.encode()).hexdigest()
 
-    def initialize_index(self, force_reload: bool = False, max_retries: int = 3) -> bool:
+    def _setup_weaviate(self):
+        """Set up Weaviate vector store."""
+        try:
+            import weaviate
+            from weaviate.auth import AuthApiKey
+        except ImportError:
+            raise ImportError(
+                "Weaviate client not installed. Run: pip install weaviate-client"
+            )
+
+        if not self.weaviate_url:
+            raise ValueError(
+                "WEAVIATE_URL not set. Get a free cluster at https://console.weaviate.cloud"
+            )
+
+        logger.info(f"🔗 Connecting to Weaviate at {self.weaviate_url}")
+
+        # Connect to Weaviate Cloud
+        if self.weaviate_api_key:
+            client = weaviate.Client(
+                url=self.weaviate_url,
+                auth_client_secret=AuthApiKey(api_key=self.weaviate_api_key),
+                additional_headers={
+                    "X-OpenAI-Api-Key": os.getenv("OPENAI_API_KEY")
+                }
+            )
+        else:
+            client = weaviate.Client(
+                url=self.weaviate_url,
+                additional_headers={
+                    "X-OpenAI-Api-Key": os.getenv("OPENAI_API_KEY")
+                }
+            )
+
+        # Create vector store
+        self.vector_store = WeaviateVectorStore(
+            weaviate_client=client,
+            index_name=self.index_name
+        )
+        
+        logger.info(f"✓ Connected to Weaviate (index: {self.index_name})")
+        return client
+
+    def initialize_index(self, force_reload: bool = False) -> bool:
         """
-        Load or create index with optimizations and rate limit handling.
+        Load or create index using Weaviate.
+        Embeddings are stored in Weaviate Cloud!
         """
         try:
-            # Try to load existing index first
-            if not force_reload and self.persist_dir.exists():
-                logger.info("📚 Loading existing index...")
+            # Set up Weaviate
+            weaviate_client = self._setup_weaviate()
+
+            # Check if index already exists in Weaviate
+            schema = weaviate_client.schema.get()
+            index_exists = any(
+                cls["class"] == self.index_name 
+                for cls in schema.get("classes", [])
+            )
+
+            if index_exists and not force_reload:
+                logger.info("📚 Loading existing index from Weaviate...")
+                
+                # Load from Weaviate
                 storage_context = StorageContext.from_defaults(
-                    persist_dir=str(self.persist_dir)
+                    vector_store=self.vector_store
                 )
-                self.index = load_index_from_storage(storage_context)
-                logger.info("✓ Index loaded (no API calls needed!)")
+                self.index = VectorStoreIndex.from_vector_store(
+                    self.vector_store,
+                    storage_context=storage_context
+                )
+                
+                logger.info("✓ Index loaded from Weaviate (no embedding cost!)")
+                
             else:
-                logger.info(f"📄 Building optimized index from {self.data_dir}...")
+                if force_reload and index_exists:
+                    logger.info("🗑️ Deleting existing index...")
+                    weaviate_client.schema.delete_class(self.index_name)
+                
+                logger.info(f"📄 Building new index from {self.data_dir}...")
 
                 if not self.data_dir.exists():
                     raise FileNotFoundError(f"Data directory not found: {self.data_dir}")
@@ -139,41 +211,27 @@ class OptimizedRAGEngine:
                     raise ValueError(f"No PDF files found in {self.data_dir}")
 
                 logger.info(f"✓ Loaded {len(documents)} documents")
+                logger.info("⚙️ Creating embeddings and storing in Weaviate...")
+                logger.info("⏳ This will take 5-10 minutes with rate limiting, but only needs to be done ONCE!")
 
-                # Create index with retry logic for rate limits
-                logger.info("⚙️ Creating index with optimized settings...")
-                
-                retry_count = 0
-                while retry_count < max_retries:
-                    try:
-                        self.index = VectorStoreIndex.from_documents(
-                            documents,
-                            show_progress=True
-                        )
-                        break  # Success!
-                        
-                    except Exception as e:
-                        error_msg = str(e).lower()
-                        if "rate_limit" in error_msg or "429" in error_msg:
-                            retry_count += 1
-                            if retry_count < max_retries:
-                                wait_time = 10 * retry_count  # Exponential backoff
-                                logger.warning(f"⚠️ Rate limit hit (attempt {retry_count}/{max_retries}). Waiting {wait_time} seconds...")
-                                time.sleep(wait_time)
-                            else:
-                                logger.error("❌ Max retries reached. Please try again later or reduce the number of PDFs.")
-                                raise
-                        else:
-                            raise
+                # Create storage context with Weaviate
+                storage_context = StorageContext.from_defaults(
+                    vector_store=self.vector_store
+                )
 
-                # Persist for future use
-                self.persist_dir.mkdir(exist_ok=True)
-                self.index.storage_context.persist(persist_dir=str(self.persist_dir))
-                logger.info(f"✓ Index saved to {self.persist_dir}")
+                # Create index - embeddings will be stored in Weaviate
+                self.index = VectorStoreIndex.from_documents(
+                    documents,
+                    storage_context=storage_context,
+                    show_progress=True
+                )
+
+                logger.info(f"✓ Index created and stored in Weaviate!")
+                logger.info("💡 Next time you run this, it will load instantly from Weaviate!")
 
             # Create query engine
             self.query_engine = self.index.as_query_engine(
-                similarity_top_k=2,  # Reduced from 3 to save API calls
+                similarity_top_k=2,
                 response_mode="compact"
             )
 
@@ -193,7 +251,7 @@ class OptimizedRAGEngine:
         # Check cache first
         query_hash = self._get_query_hash(query)
         if use_cache and query_hash in self.query_cache:
-            print("💾 Using cached result (no API call)")
+            logger.info("💾 Using cached result (no API call)")
             cached = self.query_cache[query_hash]
             return cached['answer'], cached['citations']
 
@@ -230,7 +288,7 @@ class OptimizedRAGEngine:
             return answer, citations
 
         except Exception as e:
-            print(f"✗ Error: {str(e)}")
+            logger.error(f"✗ Error: {str(e)}")
             raise
 
     def get_marketing_strategy(
@@ -266,4 +324,4 @@ Cite specific research findings."""
         """Clear query cache to force fresh API calls."""
         self.query_cache = {}
         self._save_query_cache()
-        print("🗑️ Cache cleared")
+        logger.info("🗑️ Cache cleared")
