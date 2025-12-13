@@ -1,0 +1,79 @@
+{
+  "scoring_rules": [
+    {
+      "id": "sr-00001",
+      "content": "Ensure that scores provided in the reasoning text match the scores in the 'scores' section.",
+      "helpful_count": 0,
+      "misused_count": 1,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T17:16:51.974962",
+      "updated_at": "2025-12-13T17:20:49.510326"
+    },
+    {
+      "id": "sr-00002",
+      "content": "Provide clear and logical reasoning for all scores, including the global score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T17:20:49.512571",
+      "updated_at": "2025-12-13T17:20:49.512579"
+    },
+    {
+      "id": "sr-00003",
+      "content": "For plant-based meat alternatives, high protein content (>15g/100g) should increase the utility score by 10-15 points, reflecting its value to consumers seeking protein-rich plant-based options.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T19:55:20.644206",
+      "updated_at": "2025-12-13T19:55:20.644206"
+    },
+    {
+      "id": "sr-00004",
+      "content": "High salt content (>1.5g/100g) should decrease the utility score by 10-15 points, due to health concerns associated with high sodium intake.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T19:55:20.644206",
+      "updated_at": "2025-12-13T19:55:20.644206"
+    },
+    {
+      "id": "sr-00005",
+      "content": "Products classified as NOVA group 4 (ultra-processed) should have their utility score capped at 70, reflecting the negative perception of ultra-processed foods among health-conscious consumers.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T19:55:20.644206",
+      "updated_at": "2025-12-13T19:55:20.644206"
+    },
+    {
+      "id": "sr-00006",
+      "content": "If a product has a high salt content (>2.0g/100g) and is classified as a NOVA group 4 product, the utility score should be decreased by an additional 5-10 points, reflecting the compounded health concerns associated with high sodium intake and ultra-processed foods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T20:04:21.679559",
+      "updated_at": "2025-12-13T20:04:21.679559"
+    }
+  ],
+  "plant_based_heuristics": [],
+  "ultra_processing_pitfalls": [],
+  "packaging_patterns": [
+    {
+      "id": "pkg-00001",
+      "content": "Non-recyclable packaging should decrease the attractiveness score by 5-10 points and the positioning score by 10-15 points for plant-based products, reflecting the importance of sustainability to consumers of these products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T20:04:21.679559",
+      "updated_at": "2025-12-13T20:04:21.679559"
+    }
+  ],
+  "go_to_market_rules": [],
+  "metadata": {
+    "version": "1.0",
+    "domain": "product_intelligence",
+    "created_at": "2025-12-13T17:16:04.639972",
+    "updated_at": "2025-12-13T20:04:21.679559",
+    "total_updates": 14
+  }
+}
