@@ -220,13 +220,13 @@ if analyze_button and product_concept:
                     }
 
                     with col1:
-                        st.metric("Avg Price/kg", f"${stats['avg_price_per_kg']}")
+                        st.metric("Avg Price/kg", f"€{stats['avg_price_per_kg']}")
                     with col2:
                         st.metric("Avg CO₂/kg", f"{stats['avg_co2_emission']} kg")
                     with col3:
                         st.metric("Competitors", stats['competitor_count'])
                     with col4:
-                        st.metric("Price Range", f"${stats['price_range']['min']}-${stats['price_range']['max']}")
+                        st.metric("Price Range", f"€{stats['price_range']['min']}-€{stats['price_range']['max']}")
 
                     st.markdown("---")
 
@@ -257,7 +257,7 @@ if analyze_button and product_concept:
                             df,
                             x='Company',
                             y='Price_per_kg',
-                            title='Price Comparison ($/kg)',
+                            title='Price Comparison (€/kg)',
                             color='Price_per_kg',
                             color_continuous_scale='Viridis'
                         )
@@ -286,7 +286,7 @@ if analyze_button and product_concept:
                         color='Company',
                         hover_data=['Product', 'Marketing_Claim'],
                         title='Price vs Environmental Impact',
-                        labels={'CO2_Emission_kg': 'CO₂ Emissions (kg)', 'Price_per_kg': 'Price ($/kg)'}
+                        labels={'CO2_Emission_kg': 'CO₂ Emissions (kg)', 'Price_per_kg': 'Price (€/kg)'}
                     )
                     st.plotly_chart(fig_scatter, width='stretch')
 
