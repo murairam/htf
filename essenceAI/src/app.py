@@ -81,11 +81,22 @@ with st.sidebar:
     )
 
     st.markdown("### 🧠 Target Consumer Segment")
-    segment = st.selectbox(
-        "Consumer Psychology Profile",
-        ["Skeptic", "High Essentialist", "Non-Consumer"],
-        help="Based on Food Essentialism research (Cheon et al., 2025)"
+    st.markdown("*Optional: Add psychological targeting*")
+
+    use_segment = st.checkbox(
+        "Enable segment-specific insights",
+        value=False,
+        help="Get tailored marketing strategy based on consumer psychology"
     )
+
+    if use_segment:
+        segment = st.selectbox(
+            "Consumer Psychology Profile",
+            ["Skeptic", "High Essentialist", "Non-Consumer"],
+            help="Based on Food Essentialism research (Cheon et al., 2025)"
+        )
+    else:
+        segment = None
 
     st.markdown("---")
 
@@ -249,16 +260,28 @@ if analyze_button and product_concept:
                     rag_engine = st.session_state.rag_engine
 
                     # Get marketing strategy
-                    strategy, citations = rag_engine.get_marketing_strategy(
-                        product_concept,
-                        category,
-                        segment
-                    )
+                    if segment:
+                        strategy, citations = rag_engine.get_marketing_strategy(
+                            product_concept,
+                            category,
+                            segment
+                        )
 
-                    # Display strategy
-                    st.markdown("#### 📝 Recommended Strategy")
-                    st.markdown(f"**Target Segment:** {segment}")
-                    st.info(strategy)
+                        # Display strategy
+                        st.markdown("#### 📝 Recommended Strategy")
+                        st.markdown(f"**Target Segment:** {segment}")
+                        st.info(strategy)
+                    else:
+                        # General strategy without segment targeting
+                        strategy, citations = rag_engine.get_general_strategy(
+                            product_concept,
+                            category
+                        )
+
+                        # Display strategy
+                        st.markdown("#### 📝 General Marketing Strategy")
+                        st.info(strategy)
+                        st.info("💡 **Tip:** Enable 'segment-specific insights' in the sidebar for targeted psychological strategies based on consumer research.")
 
                     # Display citations
                     st.markdown("#### 📚 Scientific Sources")
@@ -277,37 +300,38 @@ if analyze_button and product_concept:
                         else:
                             st.info("No specific citations available for this query.")
 
-                    # Segment explanation
-                    st.markdown("---")
-                    st.markdown("#### 🧠 Understanding Your Target Segment")
+                    # Segment explanation (only if segment is selected)
+                    if segment:
+                        st.markdown("---")
+                        st.markdown("#### 🧠 Understanding Your Target Segment")
 
-                    segment_info = {
-                        "High Essentialist": {
-                            "description": "Consumers who believe food categories have an immutable 'essence'",
-                            "key_insight": "More likely to accept PBMAs if they successfully mimic sensory properties",
-                            "strategy": "Emphasize sensory mimicry: 'Tastes like real meat', 'Juicy texture'"
-                        },
-                        "Skeptic": {
-                            "description": "Low essentialists who value naturalness and origins",
-                            "key_insight": "Reject products perceived as 'processed' or 'fake'",
-                            "strategy": "Emphasize clean ingredients, natural origins, avoid uncanny comparisons"
-                        },
-                        "Non-Consumer": {
-                            "description": "Neophobic consumers unfamiliar with alternatives",
-                            "key_insight": "Fear of unfamiliar/processed foods",
-                            "strategy": "Focus on familiar contexts, ease of use, downplay processing"
+                        segment_info = {
+                            "High Essentialist": {
+                                "description": "Consumers who believe food categories have an immutable 'essence'",
+                                "key_insight": "More likely to accept PBMAs if they successfully mimic sensory properties",
+                                "strategy": "Emphasize sensory mimicry: 'Tastes like real meat', 'Juicy texture'"
+                            },
+                            "Skeptic": {
+                                "description": "Low essentialists who value naturalness and origins",
+                                "key_insight": "Reject products perceived as 'processed' or 'fake'",
+                                "strategy": "Emphasize clean ingredients, natural origins, avoid uncanny comparisons"
+                            },
+                            "Non-Consumer": {
+                                "description": "Neophobic consumers unfamiliar with alternatives",
+                                "key_insight": "Fear of unfamiliar/processed foods",
+                                "strategy": "Focus on familiar contexts, ease of use, downplay processing"
+                            }
                         }
-                    }
 
-                    info = segment_info[segment]
-                    col1, col2, col3 = st.columns(3)
+                        info = segment_info[segment]
+                        col1, col2, col3 = st.columns(3)
 
-                    with col1:
-                        st.markdown(f"**Description:**\n{info['description']}")
-                    with col2:
-                        st.markdown(f"**Key Insight:**\n{info['key_insight']}")
-                    with col3:
-                        st.markdown(f"**Strategy:**\n{info['strategy']}")
+                        with col1:
+                            st.markdown(f"**Description:**\n{info['description']}")
+                        with col2:
+                            st.markdown(f"**Key Insight:**\n{info['key_insight']}")
+                        with col3:
+                            st.markdown(f"**Strategy:**\n{info['strategy']}")
 
                 except Exception as e:
                     st.error(f"Error generating strategy: {str(e)}")
