@@ -2,150 +2,772 @@
   "scoring_rules": [
     {
       "id": "sr-00001",
-      "content": "Ensure that scores provided in the reasoning text match the scores in the 'scores' section.",
+      "content": "Bronze Level Baseline: Award 50 points if the packaging strictly complies with French Law AGEC and REACH regulations, ensuring no prohibited substances are used.",
       "helpful_count": 0,
-      "misused_count": 1,
+      "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T17:16:51.974962",
-      "updated_at": "2025-12-13T17:20:49.510326"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00002",
-      "content": "Provide clear and logical reasoning for all scores, including the global score.",
+      "content": "Essential Functionality: Deduct 20 points if any packaging component does not serve a critical function (protection, transport, information) and is purely decorative[cite: 106].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T17:20:49.512571",
-      "updated_at": "2025-12-13T17:20:49.512579"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00003",
-      "content": "For plant-based meat alternatives, high protein content (>15g/100g) should increase the utility score by 10-15 points, reflecting its value to consumers seeking protein-rich plant-based options.",
+      "content": "Recycling Stream Existence: Deduct 30 points if the primary material does not have an operational recycling stream in France (e.g., PLA, PVC, PSE)[cite: 383].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T19:55:20.644206",
-      "updated_at": "2025-12-13T19:55:20.644206"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00004",
-      "content": "High salt content (>1.5g/100g) should decrease the utility score by 10-15 points, due to health concerns associated with high sodium intake.",
+      "content": "Mono-Material Bonus: Add 15 points if the entire packaging unit is made of a single material (e.g., 100% paperboard or 100% PE), facilitating easy recycling[cite: 354].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T19:55:20.644206",
-      "updated_at": "2025-12-13T19:55:20.644206"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00005",
-      "content": "Products classified as NOVA group 4 (ultra-processed) should have their utility score capped at 70, reflecting the negative perception of ultra-processed foods among health-conscious consumers.",
+      "content": "Separability Score: If multi-material is necessary (e.g., barrier film on tray), add 10 points only if components are easily separable by the consumer (e.g., peelable film)[cite: 665].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T19:55:20.644206",
-      "updated_at": "2025-12-13T19:55:20.644206"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00006",
-      "content": "If a product has a high salt content (>2.0g/100g) and is classified as a NOVA group 4 product, the utility score should be decreased by an additional 5-10 points, reflecting the compounded health concerns associated with high sodium intake and ultra-processed foods.",
+      "content": "Weight Reduction: Add 5 points for every 10% reduction in packaging weight compared to the previous version or market average[cite: 343].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T20:04:21.679559",
-      "updated_at": "2025-12-13T20:04:21.679559"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00007",
-      "content": "For products that do not fit into any of the typical plant-based categories (meat alternatives, dairy alternatives, plant milks, snacks/prepared), the utility score should reflect the lack of nutritional benefits typically associated with plant-based foods. This could result in a lower utility score.",
+      "content": "Volume Optimization: Deduct 15 points if the 'void rate' (empty space inside the packaging) exceeds 20%, unless necessary for product protection[cite: 346].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T22:45:32.197287",
-      "updated_at": "2025-12-13T22:45:32.197300"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00008",
-      "content": "The presence or absence of certifications (organic, vegan, etc.) should be considered in the utility score. Lack of such certifications could decrease the trust/utility perception, resulting in a lower utility score.",
+      "content": "Recycled Content (Silver Level): Add 10 points if the packaging contains at least 30% Post-Consumer Recycled (PCR) material[cite: 627].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T22:45:32.197329",
-      "updated_at": "2025-12-13T22:45:32.197333"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00009",
-      "content": "High sugar content (>8g/100g) should decrease the utility score by 10-15 points, due to health concerns associated with high sugar intake.",
+      "content": "High Recycled Content: Add 20 points if the packaging contains over 50% recycled content (e.g., rPET bottles for plant milks)[cite: 627].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T22:56:19.669538",
-      "updated_at": "2025-12-13T22:56:19.669554"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00010",
-      "content": "If a product has high sugar content (>8g/100g) and is classified as a NOVA group 4 product, the utility score should be decreased by an additional 5-10 points, reflecting the compounded health concerns associated with high sugar intake and ultra-processed foods.",
+      "content": "FSC/PEFC Certification: Mandatory for wood/paper. [cite_start]Deduct 50 points (disqualification from Silver/Gold) if fiber-based materials are not certified sustainable[cite: 474].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T22:56:19.669596",
-      "updated_at": "2025-12-13T22:56:19.669603"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00011",
-      "content": "Ensure products are correctly categorized before scoring. Incorrect categorization can lead to inappropriate scoring criteria and inaccurate scores.",
+      "content": "Bio-sourced Material (Silver Level): Add 10 points for bio-sourced materials (e.g., bio-PE) only if they are chemically identical to their fossil counterparts and fully recyclable[cite: 485].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T23:04:46.138028",
-      "updated_at": "2025-12-13T23:04:46.138034"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "sr-00012",
-      "content": "For products that do not fit into any of the typical categories, develop appropriate scoring criteria that reflect the product's unique characteristics. This could result in a lower utility score.",
+      "content": "Gold Level Innovation: Award 100 points for a completely package-free solution (bulk) or a validated reuse/deposit scheme[cite: 607].",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T23:04:46.138051",
-      "updated_at": "2025-12-13T23:04:46.138052"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "sr-00013",
+      "content": "Reuse Design: Add 20 points if the packaging is designed to be washable and refillable for at least 10 cycles[cite: 372].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "sr-00014",
+      "content": "Plastic Substitution: Add 15 points for successfully replacing a plastic component with a fiber-based alternative (e.g., cardboard tray instead of plastic tray) without compromising shelf life[cite: 471].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "sr-00015",
+      "content": "Dark Plastics Penalty: Deduct 25 points for using Carbon Black (dark plastics) as they are undetectable by optical sorters in recycling centers.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "sr-00016",
+      "content": "Inks & Glues: Deduct 10 points if inks or glues exceed 5% of total weight or use heavy metals that contaminate the recycling batch[cite: 394].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "sr-00017",
+      "content": "Intrinsic Quality - Preservation Barrier: Allocate up to 30% of the total score for properties that prevent food waste (key for plant-based sensitivity), specifically anti-oxidation and moisture barriers[cite: 101, 113].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:50:00.000000",
+      "updated_at": "2025-12-14T10:50:00.000000"
+    },
+    {
+      "id": "sr-00018",
+      "content": "Intrinsic Quality - Mechanical Robustness: Ensure high shock resistance to protect fragile plant-based textures during logistics, avoiding product loss (solidité)[cite: 113].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:50:00.000000",
+      "updated_at": "2025-12-14T10:50:00.000000"
+    },
+    {
+      "id": "sr-00019",
+      "content": "Intrinsic Quality - Ergonomics & Portioning: Award points for tool-free opening systems and portionable formats that allow consumers to use only what they need, minimizing waste[cite: 113].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:50:00.000000",
+      "updated_at": "2025-12-14T10:50:00.000000"
+    },
+    {
+      "id": "sr-00020",
+      "content": "Consumer Attractiveness - Aesthetic Weighting: Allocate 25% of the score to aesthetics, prioritizing natural colors and modern minimalist designs that visually cue 'plant-based' without clutter[cite: 113].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:50:00.000000",
+      "updated_at": "2025-12-14T10:50:00.000000"
+    },
+    {
+      "id": "sr-00021",
+      "content": "Consumer Attractiveness - Marketing Integrity: Award points for appetizing visuals that avoid 'greenwashing' and ensure prominent, legible 'plant-based' and nutritional labeling[cite: 113].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:50:00.000000",
+      "updated_at": "2025-12-14T10:50:00.000000"
+    },
+    {
+      "id": "sr-00022",
+      "content": "Consumer Attractiveness - Intent to Purchase: Validate the design with a Gold Level requirement of >80% approval in consumer intent-to-purchase surveys.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:50:00.000000",
+      "updated_at": "2025-12-14T10:50:00.000000"
+    },
+    {
+      "id": "sr-00023",
+      "content": "Practical Utility - Portability & Reusability: Allocate 20% of the score for features that enhance portability (lightweight, stackable) and enable reuse (rechargeable containers)[cite: 371].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:50:00.000000",
+      "updated_at": "2025-12-14T10:50:00.000000"
+    },
+    {
+      "id": "sr-00024",
+      "content": "Practical Utility - User Experience (UX): Prioritize intuitive handling and compatibility with modern habits (e.g., microwave/fridge safe) for the convenience-seeking plant-based demographic[cite: 113].",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:50:00.000000",
+      "updated_at": "2025-12-14T10:50:00.000000"
     }
   ],
-  "plant_based_heuristics": [],
-  "ultra_processing_pitfalls": [],
+  "material_heuristics": [
+    {
+      "id": "mh-00001",
+      "content": "Prioritize Paper/Cardboard: For plant-based dry goods or frozen items, cardboard is the preferred material due to its high recycling rate and renewable origin.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00002",
+      "content": "Clear PET for Liquids: For plant-based milks and oils, use transparent PET (not opaque or colored) to ensure detection by optical sorters.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00003",
+      "content": "Avoid Multi-Layer Cartons if Possible: While common for plant milks, Tetra-style cartons are harder to recycle than mono-PE or mono-PET. Only use if shelf-life requires it.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00004",
+      "content": "PEHD for Rigids: For tubs (yogurt alternatives, spreads), rigid PEHD is preferred over PP in some regions, but both are generally acceptable if mono-material.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00005",
+      "content": "Molded Pulp Trays: Replace plastic trays for fresh produce or sturdy plant-based meats with molded pulp, ensuring any liners are peelable.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00006",
+      "content": "No PVC Cling Film: PVC is a major contaminant. Use PE-based cling films for wrapping fresh plant-based cuts.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00007",
+      "content": "Avoid Polystyrene (PSE/PS): Eliminate PS for yogurt pots or trays; it has no long-term recycling viability in France. Switch to PET or cardboard.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00008",
+      "content": "Bio-PE vs. PLA: Prefer Bio-PE (from sugarcane) over PLA. Bio-PE recycles with standard PE; PLA often ends up in incineration if not industrially composted.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00009",
+      "content": "Aluminium Utility: Aluminum is excellent for high-barrier needs (long shelf life plant pâtés) and is infinitely recyclable.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00010",
+      "content": "Wood for Logistics: Wood (pallets, crates) is excellent but must be treated/clean and ideally reused, not just recycled.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00011",
+      "content": "Complex Laminates Warning: Avoid paper/plastic laminates where the plastic content is >50% but it looks like paper. This is greenwashing and hard to recycle.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00012",
+      "content": "Barrier Coatings: If using paper for moist plant-based meats, use water-based dispersion coatings rather than PE-lamination to facilitate repulping.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00013",
+      "content": "Carbon Black Free: If black packaging is required for premium plant-based branding, use carbon-black-free dyes that are NIR-detectable.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00014",
+      "content": "Glass for Reuse Only: Glass has a high carbon footprint for single use. Use it only if a deposit/return scheme is in place.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00015",
+      "content": "Vegetable Inks: Specify vegetable-based inks for all printing to reduce chemical toxicity in the recycling sludge.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00016",
+      "content": "Adhesive Compatibility: Use water-soluble adhesives (hot-melt) that wash off at <60°C during the recycling wash process.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00017",
+      "content": "Direct Print on PET: Avoid large shrink sleeves on PET bottles. Direct printing or small paper labels are preferred.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00018",
+      "content": "Cork/Wood Stoppers: Avoid combining natural stoppers (cork/wood) with plastic bottles; they are contaminants.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00019",
+      "content": "Ceramic/Stoneware: Avoid for single-use. They are generally not recyclable in household streams.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "mh-00020",
+      "content": "Flexible Pouches: Mono-PE pouches are emerging as recyclable, but ensure they are not multi-layer PE/PET laminates.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    }
+  ],
   "packaging_patterns": [
     {
       "id": "pkg-00001",
-      "content": "Non-recyclable packaging should decrease the attractiveness score by 5-10 points and the positioning score by 10-15 points for plant-based products, reflecting the importance of sustainability to consumers of these products.",
+      "content": "The 'Burger Sleeve' Strategy: Replace full cardboard boxes for frozen patties with a simple paper band or thinner cardboard sleeve to reduce material by 40%.",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T20:04:21.679559",
-      "updated_at": "2025-12-13T20:04:21.679559"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "pkg-00002",
-      "content": "Lack of recyclable packaging should decrease the attractiveness score by an additional 5-10 points and the positioning score by an additional 10-15 points for energy drinks, reflecting the importance of sustainability to consumers of these products.",
+      "content": "Skin-Pack for Fresh: Use skin-pack technology (thin film vacuum sealed to card) for fresh plant meat. It extends shelf life (reducing food waste) and uses 70% less plastic than MAP trays.",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T22:56:19.669631",
-      "updated_at": "2025-12-13T22:56:19.669637"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     },
     {
       "id": "pkg-00003",
-      "content": "Consider the impact of a product's packaging on its scores, particularly for products in categories where sustainability is important to consumers. Non-recyclable packaging should decrease the attractiveness score by 5-10 points and the positioning score by 10-15 points.",
+      "content": "Window Removal: Remove plastic viewing windows from nugget/finger food boxes. Use high-quality photography to depict the product instead.",
       "helpful_count": 0,
       "misused_count": 0,
       "irrelevant_count": 0,
-      "created_at": "2025-12-13T23:04:46.138044",
-      "updated_at": "2025-12-13T23:04:46.138045"
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00004",
+      "content": "Bulk Bins: For dry plant proteins (TVP, lentils), design packaging for bulk gravity bins rather than individual 500g bags.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00005",
+      "content": "Concentrates: Sell plant milks as concentrates or powders to reduce water transport and packaging volume by 90%.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00006",
+      "content": "Paper-Based Multipacks: Replace plastic shrink wrap on plant milk multipacks with cardboard clips or paper adhesives.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00007",
+      "content": "Reusable E-commerce: For D2C plant-based frozen shipments, use reusable insulated totes (like wool-cool or reusable plastic) instead of Styrofoam.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00008",
+      "content": "Stackability: Redesign rigid containers to be rectangular rather than round to optimize pallet density and reduce transport emissions.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00009",
+      "content": "Right-Sizing: Use 'box-on-demand' technology in fulfillment centers to ensure the shipping box exactly fits the product, eliminating void fill.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00010",
+      "content": "Tethered Caps: Ensure all beverage caps (plant milks) are tethered to the bottle/carton to prevent littering (EU mandatory).",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00011",
+      "content": "Flexible Refills: Sell the main product in a durable glass/steel jar, and refills in lightweight mono-material pouches.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00012",
+      "content": "Edible Coatings: Explore edible, plant-based coatings (e.g., Apeel) for fresh produce to eliminate wrapping entirely.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00013",
+      "content": "Paper-Based Tape: Replace plastic packing tape with water-activated paper tape for logistics boxes.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00014",
+      "content": "Mono-Material Lidding: For dips/spreads, use a PET lid on a PET tub, rather than an aluminum foil seal, to keep it 100% mono-material.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00015",
+      "content": "Reusable Pallet Wraps: Switch from single-use stretch film to reusable pallet wraps/nets for internal logistics.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00016",
+      "content": "Padless Meat Trays: Design trays with honeycomb structures to absorb juices naturally, eliminating the need for a separate non-recyclable absorbent pad.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00017",
+      "content": "Label-Free: Use laser engraving for Best Before dates and batch codes directly on the packaging surface.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00018",
+      "content": "Flat-Pack Design: Design primary packaging to fold flat when empty, encouraging consumers to recycle and saving waste bin space.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00019",
+      "content": "Sample Sizes in Paper: Distribute marketing samples in paper sachets rather than mini plastic flow-wraps.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "pkg-00020",
+      "content": "The 'Naked' Product: For robust vegetables or fruits, sell loose with only a sticker, completely removing the bag.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
     }
   ],
-  "go_to_market_rules": [],
+  "go_to_market_rules": [
+    {
+      "id": "gtm-00001",
+      "content": "Triman Logo Mandatory: You must display the Triman logo + sorting instructions on all recyclable packaging sold in France (Law AGEC).",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00002",
+      "content": "Ban on 'Biodegradable': Do not use the word 'Biodegradable' on packaging. It is vague and prohibited in France for being misleading. Use 'Compostable' only if certified.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00003",
+      "content": "Compostable Claims: You cannot claim 'Compostable' if it is only industrially compostable and no collection stream exists for consumers.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00004",
+      "content": "Penalty Avoidance: Ensure your plastic has a recycling stream to avoid the 2022 malus/penalty imposed by the state on non-recyclable plastics.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00005",
+      "content": "Recycled Content Claim: You can claim 'Made from X% recycled material' but must be able to prove traceability.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00006",
+      "content": "Single-Use Plastic Reduction: Explicitly state efforts to reduce single-use plastic, as this aligns with the 2025/2030 reduction goals of the Law AGEC.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00007",
+      "content": "QR Code Education: Use a QR code to link to a 'Sustainability Journey' page, explaining how to reuse or recycle the pack, as space on-pack is limited.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00008",
+      "content": "Transparency on Origin: Clearly state where the packaging is made. 'Made in France' packaging appeals to local sustainability values.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00009",
+      "content": "Bio-sourced Clarity: If using bio-sourced plastic, clarify it is 'Plant-based PE' and '100% Recyclable' to avoid confusion with biodegradable plastics.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00010",
+      "content": "Avoid Greenwashing: Do not use vague terms like 'Eco-friendly' or 'Green' without specific, substantiated qualifiers.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00011",
+      "content": "Consumer Sorting Nudges: Use color-coding on packs (e.g., Yellow for plastic/metal bins) to help consumers sort correctly.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00012",
+      "content": "Separation Instructions: If components must be separated (e.g., pot and cardboard sleeve), explicitly instruct the consumer: 'Remove sleeve to recycle'.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00013",
+      "content": "Date Marking Visibility: Ensure Use-By dates are legible to prevent food waste, which has a higher impact than packaging waste.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00014",
+      "content": "Eco-Modulation: Design packaging to qualify for CITEO eco-modulation bonuses (e.g., off-white PET, rigid PE) to reduce producer fees.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00015",
+      "content": "Reuse Labeling: If the packaging is reusable, it must be labeled as such with clear instructions on how to return or refill it.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00016",
+      "content": "Plastic-Free Logo: Use a 'Plastic Free' certification mark (like A Plastic Planet) if the product is genuinely 100% plastic-free.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00017",
+      "content": "B2B Communication: For foodservice (catering), clearly label bulk packaging for proper back-of-house sorting.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00018",
+      "content": "No Littering: Include the 'Do not litter' (Tidy Man) symbol, especially for snacking products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00019",
+      "content": "Local Recycling Rules: Include a disclaimer 'Check local recycling rules' if exporting to regions with different systems than France.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    },
+    {
+      "id": "gtm-00020",
+      "content": "Marketing Consistency: Ensure the packaging material aligns with the brand ethos. A vegan/plant-based product in heavy, non-recyclable plastic creates cognitive dissonance for consumers.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T10:45:00.000000",
+      "updated_at": "2025-12-14T10:45:00.000000"
+    }
+  ],
   "metadata": {
     "version": "1.0",
-    "domain": "product_intelligence",
-    "created_at": "2025-12-13T17:16:04.639972",
-    "updated_at": "2025-12-13T23:04:46.138054",
-    "total_updates": 22
+    "domain": "plant_based_packaging_eco_design",
+    "created_at": "2025-12-14T10:45:00.000000",
+    "updated_at": "2025-12-14T10:45:00.000000",
+    "total_updates": 80
   }
 }
