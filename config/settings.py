@@ -111,6 +111,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# FastAPI LLM Service Configuration
+# FastAPI LLM Service Configuration (Legacy - kept for backward compatibility)
 FASTAPI_URL = os.environ.get('FASTAPI_URL', 'http://localhost:8001')
 FASTAPI_TIMEOUT = int(os.environ.get('FASTAPI_TIMEOUT', '60'))
+
+# API_Final_Agent Unified Service Configuration
+FINAL_AGENT_BASE_URL = os.environ.get('FINAL_AGENT_BASE_URL', 'http://localhost:8001')
+FINAL_AGENT_TIMEOUT = int(os.environ.get('FINAL_AGENT_TIMEOUT', '180'))  # Increased to 180s for LLM processing

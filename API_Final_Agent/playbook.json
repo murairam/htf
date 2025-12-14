@@ -1,0 +1,738 @@
+{
+  "scoring_rules": [
+    {
+      "id": "sr-00001",
+      "content": "When the business objective is to improve shelf visibility, factors such as packaging color, size, and design should be given more weight in the attractiveness score calculation.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:25:32.006861",
+      "updated_at": "2025-12-14T13:25:32.006870"
+    },
+    {
+      "id": "sr-00002",
+      "content": "For products with the objective to improve shelf visibility, the attractiveness score should consider the impact of packaging color, size, and design. Products with bright, distinctive colors, larger sizes, or unique designs should receive higher attractiveness scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:30:56.464698",
+      "updated_at": "2025-12-14T13:30:56.464703"
+    },
+    {
+      "id": "sr-00003",
+      "content": "When the business objective is to improve shelf visibility, the attractiveness score should consider the impact of packaging attributes such as color, size, and design. Bright, distinctive colors, larger sizes, or unique designs should receive higher attractiveness scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:42:00.318048",
+      "updated_at": "2025-12-14T13:42:00.318062"
+    },
+    {
+      "id": "sr-00004",
+      "content": "When the business objective is to improve shelf visibility, the attractiveness score should consider the impact of packaging attributes such as color, size, and design. Bright, distinctive colors, larger sizes, or unique designs should receive higher attractiveness scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:42:53.707275",
+      "updated_at": "2025-12-14T13:42:53.707283"
+    },
+    {
+      "id": "sr-00005",
+      "content": "For bottled water products, the analysis should focus on factors such as the source and purity of the water, the environmental impact of the packaging, and the product's nutritional content. These factors should be given more weight in the utility score calculation.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:06:41.695021",
+      "updated_at": "2025-12-14T14:06:41.695031"
+    },
+    {
+      "id": "sr-00006",
+      "content": "The product's nutritional content is a key factor in the utility score for food products. Therefore, the analysis should consider the product's nutritional content, even if it is a bottled water product.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:06:41.695043",
+      "updated_at": "2025-12-14T14:06:41.695045"
+    },
+    {
+      "id": "sr-00007",
+      "content": "For bottled water products, the utility score should consider the product's nutritional content, even if it is minimal or non-existent. This is because the nutritional content is a key factor in the product's utility.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:08:50.405155",
+      "updated_at": "2025-12-14T14:08:50.405167"
+    },
+    {
+      "id": "sr-00008",
+      "content": "When the business objective is to improve shelf visibility, the attractiveness score should consider the impact of packaging attributes such as color, size, and design. Bright, distinctive colors, larger sizes, or unique designs should receive higher attractiveness scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:08:50.405190",
+      "updated_at": "2025-12-14T14:08:50.405192"
+    },
+    {
+      "id": "sr-00009",
+      "content": "Even for products with minimal or no nutritional content, such as bottled water, the nutritional content should be considered in the utility score calculation. This ensures a comprehensive evaluation of the product's utility.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:10:46.390113",
+      "updated_at": "2025-12-14T14:10:46.390122"
+    },
+    {
+      "id": "sr-00010",
+      "content": "For products with minimal or no nutritional content, such as bottled water, the nutritional content should still be considered in the utility score calculation to ensure a comprehensive evaluation of the product's utility.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:13:51.262288",
+      "updated_at": "2025-12-14T14:13:51.262294"
+    },
+    {
+      "id": "sr-00011",
+      "content": "When the business objective is to improve shelf visibility, the attractiveness score should consider the impact of packaging attributes such as color, size, and design. Bright, distinctive colors, larger sizes, or unique designs should receive higher attractiveness scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:13:51.262305",
+      "updated_at": "2025-12-14T14:13:51.262306"
+    },
+    {
+      "id": "sr-00012",
+      "content": "For plant-based food products, the utility score calculation should consider the product's nutritional content, including its protein, fiber, salt, and sugar levels. Products with high protein and fiber content and low salt and sugar levels should receive higher utility scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:03:47.978677",
+      "updated_at": "2025-12-14T15:03:47.978693"
+    },
+    {
+      "id": "sr-00013",
+      "content": "The product's NOVA group should be considered in the utility score calculation. NOVA 4 products, which are ultra-processed, should receive a lower utility score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:03:47.978711",
+      "updated_at": "2025-12-14T15:03:47.978715"
+    },
+    {
+      "id": "sr-00014",
+      "content": "Products with high sugar content (>22.5g/100g) should receive a lower utility score due to the negative health impacts of excessive sugar consumption.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:06:17.834033",
+      "updated_at": "2025-12-14T15:06:17.834054"
+    },
+    {
+      "id": "sr-00015",
+      "content": "Products that use palm oil should receive a lower utility score due to the environmental and health concerns associated with palm oil production and consumption.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:06:17.834076",
+      "updated_at": "2025-12-14T15:06:17.834080"
+    },
+    {
+      "id": "sr-00016",
+      "content": "For products aimed at flexitarian consumers, the utility score should consider the product's nutritional content, including its protein, sugar, and palm oil content. Products with high protein content, low sugar content, and no palm oil should receive higher utility scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:28:37.310224",
+      "updated_at": "2025-12-14T15:28:37.310243"
+    },
+    {
+      "id": "sr-00017",
+      "content": "Products with high sugar content (>22.5g/100g) should receive a lower utility score due to the negative health impacts of excessive sugar consumption.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:39:48.873326",
+      "updated_at": "2025-12-14T15:39:48.873353"
+    },
+    {
+      "id": "sr-00018",
+      "content": "Products that use palm oil should receive a lower utility score due to the environmental and health concerns associated with palm oil production and consumption.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:39:48.873389",
+      "updated_at": "2025-12-14T15:39:48.873397"
+    },
+    {
+      "id": "sr-00019",
+      "content": "For products aimed at flexitarian consumers, the utility score should consider the product's nutritional content, including its protein, sugar, and palm oil content. Products with high protein content, low sugar content, and no palm oil should receive higher utility scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:39:48.873423",
+      "updated_at": "2025-12-14T15:39:48.873431"
+    },
+    {
+      "id": "sr-00020",
+      "content": "For products with minimal or no nutritional content, such as bottled water, the utility score should be adjusted to reflect the lack of nutritional benefits. These products should not receive a perfect utility score of 100, but rather a score that reflects their limited nutritional value.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:41:28.823970",
+      "updated_at": "2025-12-14T15:41:28.823987"
+    },
+    {
+      "id": "sr-00021",
+      "content": "For products with minimal or non-existent nutritional content, such as bottled water, the utility score should be adjusted to reflect the lack of nutritional benefits. These products should not receive a perfect utility score of 100, but rather a score that reflects their limited nutritional value.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:12:01.035200",
+      "updated_at": "2025-12-14T16:12:01.035219"
+    },
+    {
+      "id": "sr-00022",
+      "content": "When the business objective is to improve shelf visibility, the attractiveness score should consider the impact of packaging attributes such as color, size, and design. Bright, distinctive colors, larger sizes, or unique designs should receive higher attractiveness scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:12:01.035258",
+      "updated_at": "2025-12-14T16:12:01.035264"
+    },
+    {
+      "id": "sr-00023",
+      "content": "For plant-based products with minimal nutritional content, the clarity of communicated benefits should be given more weight in the utility score calculation. If the benefit is unclear, the utility score should be reduced by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:22:35.053347",
+      "updated_at": "2025-12-14T16:22:35.053358"
+    },
+    {
+      "id": "sr-00024",
+      "content": "For products with minimal nutritional content, the environmental impact of packaging should account for at least 30% of the positioning score calculation. Non-recyclable packaging should reduce the positioning score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:23:43.813630",
+      "updated_at": "2025-12-14T16:23:43.813637"
+    },
+    {
+      "id": "sr-00025",
+      "content": "Even for products with minimal nutritional content, the nutritional content should account for at least 20% of the utility score calculation. Lack of nutritional benefits should reduce the utility score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:23:43.813643",
+      "updated_at": "2025-12-14T16:23:43.813644"
+    },
+    {
+      "id": "sr-00026",
+      "content": "For products with minimal or no nutritional content, the nutritional content should account for at least 20% of the utility score calculation. Lack of nutritional benefits should reduce the utility score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:35:45.288931",
+      "updated_at": "2025-12-14T16:35:45.288947"
+    },
+    {
+      "id": "sr-00027",
+      "content": "For products with minimal or no nutritional content, the nutritional content should account for at least 20% of the utility score calculation. Lack of nutritional benefits should reduce the utility score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:49:27.498852",
+      "updated_at": "2025-12-14T16:49:27.498869"
+    },
+    {
+      "id": "sr-00028",
+      "content": "For products with minimal nutritional content, the environmental impact of packaging should account for at least 30% of the positioning score calculation. Non-recyclable packaging should reduce the positioning score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:49:27.498913",
+      "updated_at": "2025-12-14T16:49:27.498918"
+    },
+    {
+      "id": "sr-00029",
+      "content": "For products with minimal or no nutritional content, such as bottled water, the nutritional content should still account for at least 20% of the utility score calculation. Lack of nutritional benefits should reduce the utility score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:56:28.701169",
+      "updated_at": "2025-12-14T16:56:28.701175"
+    },
+    {
+      "id": "sr-00030",
+      "content": "When the business objective is to improve shelf visibility, the attractiveness score should consider the impact of packaging attributes such as color, size, and design. Bright, distinctive colors, larger sizes, or unique designs should receive higher attractiveness scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:56:28.701195",
+      "updated_at": "2025-12-14T16:56:28.701196"
+    },
+    {
+      "id": "sr-00031",
+      "content": "For products with minimal or non-existent nutritional content, such as bottled water, the utility score should not exceed 70, reflecting the limited nutritional benefits.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:03:31.536480",
+      "updated_at": "2025-12-14T17:03:31.536497"
+    },
+    {
+      "id": "sr-00032",
+      "content": "For products with non-recyclable packaging, the positioning score should be reduced by at least 20 points due to the negative environmental impact.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:03:31.536536",
+      "updated_at": "2025-12-14T17:03:31.536541"
+    },
+    {
+      "id": "sr-00033",
+      "content": "For products with minimal or non-existent nutritional content, such as bottled water, the utility score should not exceed 70, reflecting the limited nutritional benefits.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:17:59.904667",
+      "updated_at": "2025-12-14T17:17:59.904682"
+    },
+    {
+      "id": "sr-00034",
+      "content": "For products with non-recyclable packaging, the positioning score should be reduced by at least 20 points due to the negative environmental impact.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:17:59.904717",
+      "updated_at": "2025-12-14T17:17:59.904724"
+    },
+    {
+      "id": "sr-00035",
+      "content": "The product's NOVA group should be considered in the utility score calculation. Products in NOVA group 1, which are unprocessed or minimally processed, should receive a higher utility score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:17:59.904749",
+      "updated_at": "2025-12-14T17:17:59.904754"
+    },
+    {
+      "id": "sr-00036",
+      "content": "For plant-based food products, high sugar content (>22.5g/100g) should result in a utility score reduction of 10-15 points, while high protein content (>12g/100g) should result in a utility score increase of 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:23:05.300973",
+      "updated_at": "2025-12-14T17:23:05.300992"
+    },
+    {
+      "id": "sr-00037",
+      "content": "When the business objective is to improve shelf visibility, packaging attributes such as color, size, and design should contribute to 30-40% of the attractiveness score calculation. Bright, distinctive colors, larger sizes, or unique designs should receive higher attractiveness scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:23:05.301030",
+      "updated_at": "2025-12-14T17:23:05.301037"
+    },
+    {
+      "id": "sr-00038",
+      "content": "Products with high sugar content (>22.5g/100g) and the presence of palm oil should have their utility score reduced by 10-15 points due to the negative health and environmental impacts.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:31:03.519071",
+      "updated_at": "2025-12-14T17:31:03.519085"
+    },
+    {
+      "id": "sr-00039",
+      "content": "Products in NOVA group 4 (ultra-processed) should have their utility score reduced by 10-15 points due to the negative health impacts of ultra-processed foods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:31:03.519118",
+      "updated_at": "2025-12-14T17:31:03.519123"
+    },
+    {
+      "id": "sr-00040",
+      "content": "For products with minimal or non-existent nutritional content, such as bottled water, the nutritional content should still be considered in the utility score calculation. This ensures a comprehensive evaluation of the product's utility.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:38:22.431346",
+      "updated_at": "2025-12-14T17:38:22.431360"
+    },
+    {
+      "id": "sr-00041",
+      "content": "For plant-based snack products, high sugar content (>15g/100g) should reduce the utility score by 15-20 points, while protein content (>10g/100g) should increase it by 10-15 points to reflect health-conscious consumer expectations.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:58:28.920481",
+      "updated_at": "2025-12-14T17:58:28.920491"
+    },
+    {
+      "id": "sr-00042",
+      "content": "For plant-based products in NOVA group 4, the utility score should be reduced by 15 points to reflect the negative health impacts of ultra-processed foods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T18:02:55.930746",
+      "updated_at": "2025-12-14T18:02:55.930752"
+    },
+    {
+      "id": "sr-00043",
+      "content": "For plant-based snack products positioning as healthy alternatives, sugar content >15g/100g should reduce utility scores by 20 points (vs standard 10-15) to reflect heightened health expectations in this subcategory.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T18:06:10.706910",
+      "updated_at": "2025-12-14T18:06:10.706924"
+    },
+    {
+      "id": "sr-00044",
+      "content": "For plant-based snack products, high sugar content (>15g/100g) should reduce the utility score by 15-20 points, while protein content (>10g/100g) should increase it by 10-15 points to reflect health-conscious consumer expectations.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T18:09:56.143104",
+      "updated_at": "2025-12-14T18:09:56.143110"
+    },
+    {
+      "id": "sr-00045",
+      "content": "For plant-based snack products, high sugar content (>15g/100g) should reduce the utility score by 20 points (vs standard 10-15) to reflect heightened health expectations in this subcategory.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T18:11:01.979207",
+      "updated_at": "2025-12-14T18:11:01.979221"
+    },
+    {
+      "id": "sr-00046",
+      "content": "For plant-based snack products in NOVA group 4, the utility score should be reduced by 20 points (vs standard 15) to reflect heightened consumer concerns about ultra-processing in health-focused categories.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T18:11:01.979261",
+      "updated_at": "2025-12-14T18:11:01.979264"
+    }
+  ],
+  "plant_based_heuristics": [
+    {
+      "id": "pbh-00001",
+      "content": "Even if a product's plant-based category is 'unknown', the analysis should still consider potential implications related to the product's category positioning. This could include evaluating whether the product's packaging and messaging align with consumer expectations for plant-based products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:25:32.006882",
+      "updated_at": "2025-12-14T13:25:32.006884"
+    },
+    {
+      "id": "pbh-00002",
+      "content": "The product's plant-based category and nutritional content can significantly affect the utility score. Therefore, these factors should be given more weight in the utility score calculation for plant-based food products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:29:14.853892",
+      "updated_at": "2025-12-14T13:29:14.853910"
+    },
+    {
+      "id": "pbh-00003",
+      "content": "The plant-based category of a product should always be identified and considered in the analysis. This can provide important context and relevance to the analysis.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:42:00.318078",
+      "updated_at": "2025-12-14T13:42:00.318080"
+    },
+    {
+      "id": "pbh-00004",
+      "content": "Identifying the plant-based category of the product can provide additional insights for the analysis. This information can help to better understand the product's target audience and market positioning.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:42:53.707294",
+      "updated_at": "2025-12-14T13:42:53.707297"
+    },
+    {
+      "id": "pbh-00005",
+      "content": "Recognize the product's plant-based category to provide more specific insights and recommendations. For example, plant-based meat alternatives may require different considerations compared to plant-based dairy alternatives.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:03:47.978728",
+      "updated_at": "2025-12-14T15:03:47.978731"
+    },
+    {
+      "id": "pbh-00006",
+      "content": "The product's nutritional content and ingredients can significantly impact its appeal to flexitarian consumers. High sugar content and the use of palm oil, for example, can negatively impact the product's appeal to this consumer group.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:28:37.310270",
+      "updated_at": "2025-12-14T15:28:37.310274"
+    },
+    {
+      "id": "pbh-00007",
+      "content": "The presence of naturalness cues on the packaging can enhance the attractiveness of plant-based products. Products with clear naturalness cues should receive a 5-10 point boost in the attractiveness score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:22:35.053382",
+      "updated_at": "2025-12-14T16:22:35.053386"
+    },
+    {
+      "id": "pbh-00008",
+      "content": "Identifying the plant-based category of a product can provide valuable insights into the product's positioning and utility. This should be a mandatory step in the analysis of plant-based food products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:31:03.519144",
+      "updated_at": "2025-12-14T17:31:03.519147"
+    },
+    {
+      "id": "pbh-00009",
+      "content": "Snack-form plant-based products must achieve either: (1) protein >10g/100g OR (2) fiber >5g/100g to maintain utility scores above 60 when classified as NOVA 4, as these metrics partially offset ultra-processing concerns for on-the-go consumption occasions.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:58:28.920529",
+      "updated_at": "2025-12-14T17:58:28.920532"
+    }
+  ],
+  "ultra_processing_pitfalls": [],
+  "packaging_patterns": [
+    {
+      "id": "pkg-00001",
+      "content": "The packaging's environmental impact can affect the positioning score and the assessment of greenwashing risk. Therefore, the environmental impact of packaging should be considered when evaluating plant-based food products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:29:14.853946",
+      "updated_at": "2025-12-14T13:29:14.853954"
+    },
+    {
+      "id": "pkg-00002",
+      "content": "In the plant-based food category, packaging that is not environmentally friendly (e.g., non-recyclable, excessive packaging) can negatively impact the positioning score and increase the risk of greenwashing. Products with environmentally friendly packaging should receive higher positioning scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:30:56.464708",
+      "updated_at": "2025-12-14T13:30:56.464708"
+    },
+    {
+      "id": "pkg-00003",
+      "content": "The environmental impact of packaging can affect the positioning score and the assessment of greenwashing risk. Therefore, the environmental impact of packaging should be considered when evaluating plant-based food products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:42:53.707305",
+      "updated_at": "2025-12-14T13:42:53.707307"
+    },
+    {
+      "id": "pkg-00004",
+      "content": "The environmental impact of a product's packaging should be considered in the positioning score, regardless of the product category. Non-recyclable or environmentally unfriendly packaging can negatively impact the positioning score and increase the risk of greenwashing.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:08:50.405181",
+      "updated_at": "2025-12-14T14:08:50.405183"
+    },
+    {
+      "id": "pkg-00005",
+      "content": "The environmental impact of the packaging should be thoroughly considered in the positioning score calculation. Non-recyclable or environmentally unfriendly packaging can negatively impact the product's positioning and increase the risk of greenwashing.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:10:46.390135",
+      "updated_at": "2025-12-14T14:10:46.390136"
+    },
+    {
+      "id": "pkg-00006",
+      "content": "The environmental impact of the packaging should be thoroughly considered in the positioning score calculation. Non-recyclable or environmentally unfriendly packaging can negatively impact the product's positioning and increase the risk of greenwashing.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T14:13:51.262313",
+      "updated_at": "2025-12-14T14:13:51.262314"
+    },
+    {
+      "id": "pkg-00007",
+      "content": "Non-recyclable or environmentally unfriendly packaging can negatively impact the positioning score and increase the risk of greenwashing. Products with environmentally friendly packaging should receive higher positioning scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:03:47.978743",
+      "updated_at": "2025-12-14T15:03:47.978746"
+    },
+    {
+      "id": "pkg-00008",
+      "content": "Products with non-recyclable packaging should receive a lower positioning score due to the negative environmental impact of non-recyclable materials.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:06:17.834096",
+      "updated_at": "2025-12-14T15:06:17.834100"
+    },
+    {
+      "id": "pkg-00009",
+      "content": "The environmental impact of a product's packaging should be considered in the positioning score, regardless of the product category. Non-recyclable or environmentally unfriendly packaging can negatively impact the positioning score and increase the risk of greenwashing.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:28:37.310291",
+      "updated_at": "2025-12-14T15:28:37.310295"
+    },
+    {
+      "id": "pkg-00010",
+      "content": "Products with non-recyclable packaging should receive a lower positioning score due to the negative environmental impact of non-recyclable materials.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:39:48.873460",
+      "updated_at": "2025-12-14T15:39:48.873467"
+    },
+    {
+      "id": "pkg-00011",
+      "content": "For bottled water products, the environmental impact of the packaging should be given more weight in the positioning score calculation. Products with non-recyclable packaging should receive a lower positioning score due to the negative environmental impact.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T15:41:28.824030",
+      "updated_at": "2025-12-14T15:41:28.824036"
+    },
+    {
+      "id": "pkg-00012",
+      "content": "The environmental impact of a product's packaging should be considered in the positioning score, regardless of the product category. Non-recyclable or environmentally unfriendly packaging can negatively impact the positioning score and increase the risk of greenwashing.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:12:01.035288",
+      "updated_at": "2025-12-14T16:12:01.035292"
+    },
+    {
+      "id": "pkg-00013",
+      "content": "Recyclable packaging can mitigate greenwashing risks and improve positioning scores for plant-based products. Products with non-recyclable packaging should have their positioning score reduced by 10-15 points due to increased greenwashing risk.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:22:35.053402",
+      "updated_at": "2025-12-14T16:22:35.053404"
+    },
+    {
+      "id": "pkg-00014",
+      "content": "For products with minimal nutritional content, the environmental impact of packaging should account for at least 30% of the positioning score calculation. Non-recyclable packaging should reduce the positioning score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:35:45.288978",
+      "updated_at": "2025-12-14T16:35:45.288982"
+    },
+    {
+      "id": "pkg-00015",
+      "content": "The environmental impact of a product's packaging should be considered in the positioning score, regardless of the product category. Non-recyclable or environmentally unfriendly packaging can negatively impact the positioning score and increase the risk of greenwashing.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:49:27.498945",
+      "updated_at": "2025-12-14T16:49:27.498950"
+    },
+    {
+      "id": "pkg-00016",
+      "content": "The environmental impact of a product's packaging should account for at least 30% of the positioning score calculation. Non-recyclable or environmentally unfriendly packaging should reduce the positioning score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T16:56:28.701186",
+      "updated_at": "2025-12-14T16:56:28.701187"
+    },
+    {
+      "id": "pkg-00017",
+      "content": "For products with minimal or non-existent nutritional content, the environmental impact of packaging should account for at least 40% of the positioning score calculation. Non-recyclable packaging should significantly reduce the positioning score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:03:31.536568",
+      "updated_at": "2025-12-14T17:03:31.536572"
+    },
+    {
+      "id": "pkg-00018",
+      "content": "The environmental impact of a product's packaging should be considered in the positioning score, regardless of the product category. Non-recyclable or environmentally unfriendly packaging can negatively impact the positioning score and increase the risk of greenwashing.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:38:22.431410",
+      "updated_at": "2025-12-14T17:38:22.431413"
+    },
+    {
+      "id": "pkg-00019",
+      "content": "Plant-based products with non-recyclable packaging should have their positioning score reduced by 20-25 points (up from 10-15) due to heightened greenwashing risks in this category, with environmental impact accounting for 40% of the positioning score calculation.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:58:28.920514",
+      "updated_at": "2025-12-14T17:58:28.920517"
+    },
+    {
+      "id": "pkg-00020",
+      "content": "Plant-based products with non-recyclable packaging should have their positioning score reduced by 20-25 points due to heightened greenwashing risks, with environmental impact accounting for 40% of the positioning score calculation.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T18:02:55.930774",
+      "updated_at": "2025-12-14T18:02:55.930775"
+    },
+    {
+      "id": "pkg-00021",
+      "content": "For shelf-stable plant-based snacks, non-recyclable packaging should reduce positioning scores by 25 points (vs 20 for refrigerated) due to amplified waste perceptions in durable goods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T18:06:10.706956",
+      "updated_at": "2025-12-14T18:06:10.706960"
+    },
+    {
+      "id": "pkg-00022",
+      "content": "Plant-based products with non-recyclable packaging should have their positioning score reduced by 20-25 points due to heightened greenwashing risks, with environmental impact accounting for 40% of the positioning score calculation.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T18:09:56.143117",
+      "updated_at": "2025-12-14T18:09:56.143118"
+    },
+    {
+      "id": "pkg-00023",
+      "content": "For shelf-stable plant-based snacks, non-recyclable packaging should reduce positioning scores by 25 points (vs 20 for refrigerated) due to amplified waste perceptions in durable goods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T18:11:01.979244",
+      "updated_at": "2025-12-14T18:11:01.979247"
+    }
+  ],
+  "go_to_market_rules": [
+    {
+      "id": "gtm-00001",
+      "content": "Improvement proposals should be closely aligned with the business objective. For example, if the objective is to improve shelf visibility, proposals could include changes to packaging design to make the product stand out more on the shelf.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T13:25:32.006888",
+      "updated_at": "2025-12-14T13:25:32.006889"
+    },
+    {
+      "id": "gtm-00002",
+      "content": "The analysis should align with the stated business objective and provide specific recommendations for achieving this objective. If the business objective is to improve shelf durability, the analysis should provide specific recommendations for achieving this objective.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T17:38:22.431389",
+      "updated_at": "2025-12-14T17:38:22.431392"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "domain": "plant_based_packaging_intelligence",
+    "created_at": "2025-12-14T13:24:40.319693",
+    "updated_at": "2025-12-14T18:11:01.979267",
+    "total_updates": 80
+  }
+}

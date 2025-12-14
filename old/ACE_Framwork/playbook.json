@@ -1,0 +1,215 @@
+{
+  "scoring_rules": [
+    {
+      "id": "sr-00001",
+      "content": "Ensure that scores provided in the reasoning text match the scores in the 'scores' section.",
+      "helpful_count": 0,
+      "misused_count": 1,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T17:16:51.974962",
+      "updated_at": "2025-12-13T17:20:49.510326"
+    },
+    {
+      "id": "sr-00002",
+      "content": "Provide clear and logical reasoning for all scores, including the global score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T17:20:49.512571",
+      "updated_at": "2025-12-13T17:20:49.512579"
+    },
+    {
+      "id": "sr-00003",
+      "content": "For plant-based meat alternatives, high protein content (>15g/100g) should increase the utility score by 10-15 points, reflecting its value to consumers seeking protein-rich plant-based options.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T19:55:20.644206",
+      "updated_at": "2025-12-13T19:55:20.644206"
+    },
+    {
+      "id": "sr-00004",
+      "content": "High salt content (>1.5g/100g) should decrease the utility score by 10-15 points, due to health concerns associated with high sodium intake.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T19:55:20.644206",
+      "updated_at": "2025-12-13T19:55:20.644206"
+    },
+    {
+      "id": "sr-00005",
+      "content": "Products classified as NOVA group 4 (ultra-processed) should have their utility score capped at 70, reflecting the negative perception of ultra-processed foods among health-conscious consumers.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T19:55:20.644206",
+      "updated_at": "2025-12-13T19:55:20.644206"
+    },
+    {
+      "id": "sr-00006",
+      "content": "If a product has a high salt content (>2.0g/100g) and is classified as a NOVA group 4 product, the utility score should be decreased by an additional 5-10 points, reflecting the compounded health concerns associated with high sodium intake and ultra-processed foods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T20:04:21.679559",
+      "updated_at": "2025-12-13T20:04:21.679559"
+    },
+    {
+      "id": "sr-00007",
+      "content": "For products that do not fit into any of the typical plant-based categories (meat alternatives, dairy alternatives, plant milks, snacks/prepared), the utility score should reflect the lack of nutritional benefits typically associated with plant-based foods. This could result in a lower utility score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:45:32.197287",
+      "updated_at": "2025-12-13T22:45:32.197300"
+    },
+    {
+      "id": "sr-00008",
+      "content": "The presence or absence of certifications (organic, vegan, etc.) should be considered in the utility score. Lack of such certifications could decrease the trust/utility perception, resulting in a lower utility score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:45:32.197329",
+      "updated_at": "2025-12-13T22:45:32.197333"
+    },
+    {
+      "id": "sr-00009",
+      "content": "High sugar content (>8g/100g) should decrease the utility score by 10-15 points, due to health concerns associated with high sugar intake.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:56:19.669538",
+      "updated_at": "2025-12-13T22:56:19.669554"
+    },
+    {
+      "id": "sr-00010",
+      "content": "If a product has high sugar content (>8g/100g) and is classified as a NOVA group 4 product, the utility score should be decreased by an additional 5-10 points, reflecting the compounded health concerns associated with high sugar intake and ultra-processed foods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:56:19.669596",
+      "updated_at": "2025-12-13T22:56:19.669603"
+    },
+    {
+      "id": "sr-00011",
+      "content": "Ensure products are correctly categorized before scoring. Incorrect categorization can lead to inappropriate scoring criteria and inaccurate scores.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T23:04:46.138028",
+      "updated_at": "2025-12-13T23:04:46.138034"
+    },
+    {
+      "id": "sr-00012",
+      "content": "For products that do not fit into any of the typical categories, develop appropriate scoring criteria that reflect the product's unique characteristics. This could result in a lower utility score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T23:04:46.138051",
+      "updated_at": "2025-12-13T23:04:46.138052"
+    },
+    {
+      "id": "sr-00013",
+      "content": "If a product's plant-based category is unknown, analysts should develop appropriate scoring criteria that reflect the product's unique characteristics. This could result in a lower utility score.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T12:03:20.532813",
+      "updated_at": "2025-12-14T12:03:20.532818"
+    },
+    {
+      "id": "sr-00014",
+      "content": "High sugar content (>8g/100g) and NOVA group 4 classification should result in a lower utility score. If a product has high sugar content (>8g/100g) and is classified as a NOVA group 4 product, the utility score should be decreased by an additional 5-10 points, reflecting the compounded health concerns associated with high sugar intake and ultra-processed foods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T12:03:20.532835",
+      "updated_at": "2025-12-14T12:03:20.532836"
+    },
+    {
+      "id": "sr-00015",
+      "content": "Ensure the analysis aligns with the stated business objective. Misalignment can lead to recommendations that do not directly address the business objective, affecting the relevance and applicability of the analysis.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T12:06:57.731720",
+      "updated_at": "2025-12-14T12:06:57.731734"
+    },
+    {
+      "id": "sr-00016",
+      "content": "For products that do not fit into the typical plant-based categories and have minimal nutritional content (e.g., source water), the utility score should be significantly reduced, reflecting the lack of nutritional benefits typically associated with plant-based foods.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T12:08:27.844703",
+      "updated_at": "2025-12-14T12:08:27.844721"
+    }
+  ],
+  "plant_based_heuristics": [],
+  "ultra_processing_pitfalls": [],
+  "packaging_patterns": [
+    {
+      "id": "pkg-00001",
+      "content": "Non-recyclable packaging should decrease the attractiveness score by 5-10 points and the positioning score by 10-15 points for plant-based products, reflecting the importance of sustainability to consumers of these products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T20:04:21.679559",
+      "updated_at": "2025-12-13T20:04:21.679559"
+    },
+    {
+      "id": "pkg-00002",
+      "content": "Lack of recyclable packaging should decrease the attractiveness score by an additional 5-10 points and the positioning score by an additional 10-15 points for energy drinks, reflecting the importance of sustainability to consumers of these products.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T22:56:19.669631",
+      "updated_at": "2025-12-13T22:56:19.669637"
+    },
+    {
+      "id": "pkg-00003",
+      "content": "Consider the impact of a product's packaging on its scores, particularly for products in categories where sustainability is important to consumers. Non-recyclable packaging should decrease the attractiveness score by 5-10 points and the positioning score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-13T23:04:46.138044",
+      "updated_at": "2025-12-13T23:04:46.138045"
+    },
+    {
+      "id": "pkg-00004",
+      "content": "Packaging is an important factor to consider in the analysis of plant-based products, particularly in terms of attractiveness and positioning. Non-recyclable packaging should decrease the attractiveness score by 5-10 points and the positioning score by 10-15 points.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T12:03:20.532828",
+      "updated_at": "2025-12-14T12:03:20.532829"
+    },
+    {
+      "id": "pkg-00005",
+      "content": "Clear and simple packaging, along with clear communication of the product's benefits and usage, can significantly increase a product's attractiveness and utility scores. Consider these factors when analyzing a product's packaging.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T12:06:57.731748",
+      "updated_at": "2025-12-14T12:06:57.731751"
+    }
+  ],
+  "go_to_market_rules": [
+    {
+      "id": "gtm-00001",
+      "content": "For products aiming to increase shelf visibility, consider recommending positioning the product at eye level. This can increase the product's visibility and attract consumers' attention.",
+      "helpful_count": 0,
+      "misused_count": 0,
+      "irrelevant_count": 0,
+      "created_at": "2025-12-14T12:06:57.731767",
+      "updated_at": "2025-12-14T12:06:57.731770"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "domain": "product_intelligence",
+    "created_at": "2025-12-13T17:16:04.639972",
+    "updated_at": "2025-12-14T12:08:27.844730",
+    "total_updates": 29
+  }
+}

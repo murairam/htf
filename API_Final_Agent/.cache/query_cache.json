@@ -1,0 +1,21 @@
+{
+  "fb97f1518038dc03f4fc7100a0270d21": {
+    "answer": "Key factors for consumer acceptance of plant-based products include the sensory attributes such as texture and mouthfeel, which can be influenced by the composition and fat content of the products. Additionally, the labeling conditions under which the products are presented can affect acceptability, with closed label conditions generally leading to greater acceptance. Credence information, which signals quality or other attributes, also plays a significant role in shaping consumer perceptions and acceptance of these products.",
+    "citations": [
+      {
+        "source_id": 1,
+        "file_name": "Flint_et_al._2025_meating_consumer_expectations_plant_based_meat_alternative_products",
+        "page": "11",
+        "relevance_score": 0.679,
+        "excerpt": "What are the main sensory \nattributes that determine the acceptance of meat alternatives? Curr. Opin. Food Sci. \n48, 1 \u2013 7. https://doi.org/10.1016/j.cofs.2022.100924 .\nSucapane, D., Roux, C., Sobol, ..."
+      },
+      {
+        "source_id": 2,
+        "file_name": "Flint_et_al._2025_meating_consumer_expectations_plant_based_meat_alternative_products",
+        "page": "6",
+        "relevance_score": 0.664,
+        "excerpt": "Conversely, plant-based burger 1 was rated similar to meat-based burger \n1 and 3. The composition and technologies employed to develop \nplant-based products are highly variable. Plant-based burgers 1 ..."
+      }
+    ]
+  }
+}

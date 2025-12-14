@@ -4,7 +4,7 @@ import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import Analysis
-from .fastapi_client import FastAPIClient
+from .fastapi_final_client import APIFinalAgentClient
 
 logger = logging.getLogger(__name__)
 
@@ -38,15 +38,11 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
 
     async def run_analysis(self):
         """
-        Run LLM analysis by calling FastAPI service.
-        FastAPI handles:
-        - Product lookup from OpenFoodFacts
-        - Image extraction (image_front_url)
-        - LLM analysis
-        - Complete JSON response
+        Run unified analysis by calling API_Final_Agent unified service.
+        API_Final_Agent is a single FastAPI service that merges ACE and Essence pipelines internally.
         """
         try:
-            # Send initial status
+            # Send initial status immediately
             await self.send(text_data=json.dumps({
                 'type': 'status',
                 'status': 'started',
@@ -60,65 +56,42 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
                 await self.send_error("Analysis record not found")
                 return
             
-            # Update status
+            # Send processing status while waiting
             await self.send(text_data=json.dumps({
                 'type': 'status',
                 'status': 'processing',
-                'progress': 20,
-                'message': 'Connecting to analysis service...'
+                'progress': 30,
+                'message': 'Connecting to unified analysis service...'
             }))
             
-            # Initialize FastAPI client
-            client = FastAPIClient()
+            # Initialize API_Final_Agent client
+            client = APIFinalAgentClient()
             
-            # Call FastAPI /run-analysis endpoint
-            # FastAPI will handle:
-            # 1. OpenFoodFacts lookup
-            # 2. Image extraction
-            # 3. LLM analysis
-            # 4. Return complete JSON
-            await self.send(text_data=json.dumps({
-                'type': 'status',
-                'status': 'processing',
-                'progress': 40,
-                'message': 'Analyzing product packaging and market positioning...'
-            }))
-            
+            # Call API_Final_Agent /run-analysis endpoint synchronously
+            # Timeout is handled by the client (default 60s)
+            # No background tasks, no retries - direct synchronous call
             success, result = await asyncio.to_thread(
                 client.run_analysis,
                 analysis_data['analysis_id'],
-                analysis_data['barcode'],
-                analysis_data['objectives']
+                analysis_data['business_objective'],
+                barcode=analysis_data.get('barcode'),
+                product_link=analysis_data.get('product_link'),
+                product_description=analysis_data.get('product_description'),
+                domain=analysis_data.get('domain'),
+                segment=analysis_data.get('segment')
             )
             
             if not success:
                 # result contains error message
-                await self.send_error(result)
+                await self.send_error("Analysis failed. Please try again.")
                 await self.update_analysis_error(result)
                 return
             
-            # Analysis successful
-            await self.send(text_data=json.dumps({
-                'type': 'status',
-                'status': 'processing',
-                'progress': 90,
-                'message': 'Finalizing recommendations...'
-            }))
-            
-            # Save results to database
+            # Analysis successful - save results
             await self.update_analysis_result(result)
             
-            # Send completion status
-            await self.send(text_data=json.dumps({
-                'type': 'status',
-                'status': 'done',
-                'progress': 100,
-                'message': 'Analysis complete'
-            }))
-            
-            await asyncio.sleep(0.3)
-            
-            # Send final result
+            # Send final result (unified JSON from API_Final_Agent)
+            # Contains: analysis_id, input, status, merged, raw_sources, errors
             await self.send(text_data=json.dumps({
                 'type': 'final_result',
                 'payload': result
@@ -144,8 +117,12 @@ class AnalysisConsumer(AsyncWebsocketConsumer):
             analysis = Analysis.objects.get(analysis_id=self.analysis_id)
             return {
                 'analysis_id': str(analysis.analysis_id),
+                'business_objective': analysis.objectives,  # objectives is the business objective
                 'barcode': analysis.barcode,
-                'objectives': analysis.objectives,
+                'product_link': analysis.product_link,
+                'product_description': analysis.product_description,
+                'domain': None,  # Can be added to model later if needed
+                'segment': None,  # Can be added to model later if needed
             }
         except Analysis.DoesNotExist:
             logger.error(f"Analysis not found: {self.analysis_id}")

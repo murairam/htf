@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Environment variables
+.env
+
+# LlamaIndex storage
+.storage/
+storage/
+
+# Streamlit
+.streamlit/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+*.cover
+.hypothesis/
+.pytest_cache/
+.cache/
+
+# Database files
+*.db
+*.db-journal
+*.db.backup
+
+# Data (optional - uncomment if you don't want to commit PDFs)
+# data/*.pdf

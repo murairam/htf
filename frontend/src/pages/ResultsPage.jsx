@@ -1,7 +1,425 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
+import { Tab } from '@headlessui/react'
 import ProgressBar from '../components/ProgressBar'
 import Accordion from '../components/Accordion'
+import KeyValueRenderer from '../components/KeyValueRenderer'
+import VisualsRenderer from '../components/VisualsRenderer'
+import CompetitorIntelligence from '../components/CompetitorIntelligence'
+import MarketingStrategyEssence from '../components/MarketingStrategyEssence'
+import MarketingStrategyACE from '../components/MarketingStrategyACE'
+import ResearchInsights from '../components/ResearchInsights'
+import ResearchInsightsACE from '../components/ResearchInsightsACE'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
+import '../styles/cal-inspired.css'
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ')
+}
+
+const getNestedValue = (obj, path, defaultValue = null) => {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj) || defaultValue
+}
+
+// ============================================================================
+// SUB-COMPONENTS
+// ============================================================================
+
+const LoadingScreen = ({ message, progress }) => (
+  <div className="min-h-screen bg-white flex flex-col">
+    <Header />
+    <div className="flex-1 flex items-center justify-center p-4">
+      <div className="card card-elevated max-w-2xl w-full">
+        <div className="text-center mb-6">
+          <div className="text-6xl mb-4 text-blue-500">
+            <svg className="w-16 h-16 mx-auto animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Analyzing Your Product</h2>
+          <p className="text-gray-600">{message}</p>
+        </div>
+        
+        <div className="space-y-4">
+          <ProgressBar value={progress} max={100} label="Analysis Progress" />
+          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+            <span>Processing...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <Footer />
+  </div>
+)
+
+const ErrorScreen = ({ error }) => (
+  <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
+    <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+      <div className="text-center">
+        <div className="mb-4 flex justify-center">
+          <svg className="w-16 h-16 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
+        <p className="text-gray-600 mb-6">{error}</p>
+        <button onClick={() => window.location.reload()} className="btn-primary">
+          Retry
+        </button>
+      </div>
+    </div>
+    <Footer />
+  </div>
+)
+
+const PageHeader = ({ analysisId, confidenceLevel }) => (
+  <div className="text-center mb-12">
+    <div className="badge mb-4">Analysis Results</div>
+    <h1 className="text-4xl font-bold text-gray-900 mb-2">
+      Product Analysis Dashboard
+    </h1>
+    <p className="text-gray-600 mb-2">
+      Analysis ID: <span className="font-mono text-sm">{analysisId}</span>
+    </p>
+    {confidenceLevel && (
+      <p className="text-sm text-gray-500">
+        Confidence Level: <span className="font-semibold capitalize">{confidenceLevel}</span>
+      </p>
+    )}
+  </div>
+)
+
+// ============================================================================
+// TAB PANELS
+// ============================================================================
+
+const OverviewTab = ({ results, merged, imageUrl, productInfo, scores }) => (
+  <div className="grid lg:grid-cols-2 gap-6">
+    {/* LEFT COLUMN */}
+    <div className="space-y-6">
+      {/* Product Image */}
+      {imageUrl && (
+        <div className="card card-elevated">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">Product Image</h2>
+          <img
+            src={imageUrl}
+            alt="Product"
+            className="w-full h-80 object-contain rounded-lg border-2 border-gray-200 bg-gray-50"
+            onError={(e) => {
+              e.target.style.display = 'none'
+              e.target.parentElement.innerHTML = '<p class="text-gray-500 text-center py-8">Image not available</p>'
+            }}
+          />
+        </div>
+      )}
+
+      {/* Product Details */}
+      <div className="card card-elevated">
+        <h2 className="text-xl font-bold mb-4 text-gray-900">Product Details</h2>
+        <div className="space-y-3">
+          {productInfo.name && (
+            <div>
+              <p className="text-sm font-semibold text-gray-700">Product Name</p>
+              <p className="text-gray-900">{productInfo.name}</p>
+            </div>
+          )}
+          {productInfo.brand && (
+            <div>
+              <p className="text-sm font-semibold text-gray-700">Brand</p>
+              <p className="text-gray-900">{productInfo.brand}</p>
+            </div>
+          )}
+          {productInfo.barcode && (
+            <div>
+              <p className="text-sm font-semibold text-gray-700">Barcode</p>
+              <p className="text-gray-900 font-mono">{productInfo.barcode}</p>
+            </div>
+          )}
+          {productInfo.objectives && (
+            <div>
+              <p className="text-sm font-semibold text-gray-700">Business Objectives</p>
+              <p className="text-gray-900">{productInfo.objectives}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Performance Scores */}
+      {scores && (
+        <div className="card card-elevated">
+          <h2 className="text-xl font-bold mb-6 text-gray-900">Performance Scores</h2>
+          <div className="space-y-4">
+            {scores.attractiveness !== undefined && scores.attractiveness !== null && (
+              <ProgressBar value={Number(scores.attractiveness)} label="Attractiveness / Visibility" showValue={true} />
+            )}
+            {scores.utility !== undefined && scores.utility !== null && (
+              <ProgressBar value={Number(scores.utility)} label="Utility & Value" showValue={true} />
+            )}
+            {scores.positioning !== undefined && scores.positioning !== null && (
+              <ProgressBar value={Number(scores.positioning)} label="Positioning" showValue={true} />
+            )}
+            
+            {/* Global Score */}
+            {scores.global !== undefined && scores.global !== null && (
+              <div className="mt-6 pt-6 border-t-2 border-gray-300">
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border-2 border-green-500">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <h3 className="text-lg font-bold text-gray-900">Global Score</h3>
+                    </div>
+                    <div className="text-3xl font-bold text-green-600">
+                      {Number(scores.global).toFixed(1)}
+                      <span className="text-lg text-gray-500">/100</span>
+                    </div>
+                  </div>
+                  <div className="relative h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500 shadow-lg"
+                      style={{ width: `${Number(scores.global)}%` }}
+                    >
+                      <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2 text-center italic">
+                    Overall performance based on all metrics
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* RIGHT COLUMN */}
+    <div className="space-y-6">
+      <div className="card card-elevated">
+        <h2 className="text-xl font-bold mb-4 text-gray-900">Strategic Recommendations</h2>
+        
+        {/* SWOT Analysis */}
+        {(merged?.swot_analysis?.strengths || merged?.swot_analysis?.weaknesses || merged?.swot_analysis?.risks) && (
+          <Accordion title="SWOT Analysis" icon="" defaultOpen={true}>
+            <div className="space-y-4">
+              {merged.swot_analysis.strengths && merged.swot_analysis.strengths.length > 0 && (
+                <div className="bg-green-50 p-3 rounded">
+                  <h4 className="font-semibold text-sm text-green-800 mb-2">Strengths</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                    {merged.swot_analysis.strengths.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {merged.swot_analysis.weaknesses && merged.swot_analysis.weaknesses.length > 0 && (
+                <div className="bg-red-50 p-3 rounded">
+                  <h4 className="font-semibold text-sm text-red-800 mb-2">Weaknesses</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                    {merged.swot_analysis.weaknesses.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {merged.swot_analysis.risks && merged.swot_analysis.risks.length > 0 && (
+                <div className="bg-yellow-50 p-3 rounded">
+                  <h4 className="font-semibold text-sm text-yellow-800 mb-2">Risks</h4>
+                  <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                    {merged.swot_analysis.risks.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </Accordion>
+        )}
+
+        {/* Packaging Improvements */}
+        {merged?.packaging_improvements && merged.packaging_improvements.length > 0 && (
+          <Accordion title="Packaging Improvements" icon="">
+            <div className="space-y-4">
+              {merged.packaging_improvements.map((proposal, index) => {
+                let content = ''
+                let title = ''
+                let source = ''
+                
+                if (typeof proposal === 'string') {
+                  content = proposal
+                } else if (proposal && typeof proposal === 'object') {
+                  // Handle different formats
+                  title = proposal.title || proposal.name || ''
+                  content = proposal.proposal || proposal.description || proposal.suggestion || 
+                           proposal.improvement || proposal.content || proposal.action_exacte || ''
+                  source = proposal.source || ''
+                  
+                  // If still no content, try other fields
+                  if (!content && !title) {
+                    if (proposal.probleme && proposal.resultat_attendu) {
+                      // Format from image analysis
+                      title = proposal.probleme
+                      content = proposal.resultat_attendu
+                      if (proposal.action_exacte) {
+                        content = `${proposal.action_exacte}. ${content}`
+                      }
+                    } else {
+                      // Last resort: show as readable text
+                      content = Object.entries(proposal)
+                        .filter(([key, value]) => value && typeof value === 'string')
+                        .map(([key, value]) => `${key}: ${value}`)
+                        .join(' | ')
+                    }
+                  }
+                }
+                
+                return (
+                  <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-white rounded">
+                    {source && (
+                      <span className="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded mb-2">
+                        {source.toUpperCase()}
+                      </span>
+                    )}
+                    {title && <h4 className="font-semibold text-sm mb-1 text-gray-900">{title}</h4>}
+                    <p className="text-gray-700 text-sm">{content || 'No description available'}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </Accordion>
+        )}
+
+        {/* Go-to-Market Strategy */}
+        {(merged?.go_to_market_strategy?.shelf_positioning || merged?.go_to_market_strategy?.regional_relevance || merged?.go_to_market_strategy?.b2b_targeting) && (
+          <Accordion title="Go-to-Market Strategy" icon="">
+            <div className="space-y-4">
+              {merged.go_to_market_strategy.shelf_positioning && (
+                <div className="bg-white p-3 rounded border border-gray-200">
+                  <h4 className="font-semibold text-sm mb-2">Shelf Positioning</h4>
+                  <p className="text-sm text-gray-700">{merged.go_to_market_strategy.shelf_positioning}</p>
+                </div>
+              )}
+              {merged.go_to_market_strategy.regional_relevance && (
+                <div className="bg-white p-3 rounded border border-gray-200">
+                  <h4 className="font-semibold text-sm mb-2">Regional Relevance</h4>
+                  <p className="text-sm text-gray-700">{merged.go_to_market_strategy.regional_relevance}</p>
+                </div>
+              )}
+              {merged.go_to_market_strategy.b2b_targeting && (
+                <div className="bg-white p-3 rounded border border-gray-200">
+                  <h4 className="font-semibold text-sm mb-2">B2B Targeting</h4>
+                  <p className="text-sm text-gray-700">{merged.go_to_market_strategy.b2b_targeting}</p>
+                </div>
+              )}
+            </div>
+          </Accordion>
+        )}
+      </div>
+    </div>
+  </div>
+)
+
+const ACEAnalysisTab = ({ merged }) => (
+  <div className="space-y-6">
+    <div className="card card-elevated">
+      <h2 className="text-xl font-bold mb-4 text-gray-900">ACE Framework Analysis</h2>
+      <p className="text-gray-600 mb-4">
+        Detailed analysis from the ACE Framework including evidence-based explanations, quality insights, and criteria breakdown.
+      </p>
+      
+      {/* Evidence-Based Explanations */}
+      {(merged?.evidence_based_explanations?.attractiveness || merged?.evidence_based_explanations?.utility || 
+        merged?.evidence_based_explanations?.positioning || merged?.evidence_based_explanations?.global) && (
+        <Accordion title="Evidence-Based Explanations" icon="" defaultOpen={true}>
+          <div className="space-y-4">
+            {merged.evidence_based_explanations.attractiveness && merged.evidence_based_explanations.attractiveness.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm mb-2 text-gray-800">Attractiveness</h4>
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {merged.evidence_based_explanations.attractiveness.map((exp, idx) => (
+                    <li key={idx}>{exp}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {merged.evidence_based_explanations.utility && merged.evidence_based_explanations.utility.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm mb-2 text-gray-800">Utility</h4>
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {merged.evidence_based_explanations.utility.map((exp, idx) => (
+                    <li key={idx}>{exp}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {merged.evidence_based_explanations.positioning && merged.evidence_based_explanations.positioning.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm mb-2 text-gray-800">Positioning</h4>
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {merged.evidence_based_explanations.positioning.map((exp, idx) => (
+                    <li key={idx}>{exp}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {merged.evidence_based_explanations.global && merged.evidence_based_explanations.global.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm mb-2 text-gray-800">Global</h4>
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {merged.evidence_based_explanations.global.map((exp, idx) => (
+                    <li key={idx}>{exp}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </Accordion>
+      )}
+
+      {/* Quality Insights */}
+      {(merged?.quality_insights?.reflector_analysis || merged?.quality_insights?.key_insights || merged?.quality_insights?.improvement_guidelines) && (
+        <Accordion title="Quality Insights" icon="">
+          <div className="space-y-4">
+            {merged.quality_insights.reflector_analysis && (
+              <div>
+                <h4 className="font-semibold text-sm mb-2 text-gray-800">Reflector Analysis</h4>
+                <p className="text-sm text-gray-700">{merged.quality_insights.reflector_analysis}</p>
+              </div>
+            )}
+            {merged.quality_insights.key_insights && merged.quality_insights.key_insights.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm mb-2 text-gray-800">Key Insights</h4>
+                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                  {merged.quality_insights.key_insights.map((insight, idx) => (
+                    <li key={idx}>{insight}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {merged.quality_insights.improvement_guidelines && (
+              <div>
+                <h4 className="font-semibold text-sm mb-2 text-gray-800">Improvement Guidelines</h4>
+                <p className="text-sm text-gray-700">{merged.quality_insights.improvement_guidelines}</p>
+              </div>
+            )}
+          </div>
+        </Accordion>
+      )}
+    </div>
+  </div>
+)
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 const ResultsPage = () => {
   const { analysisId } = useParams()
@@ -12,25 +430,47 @@ const ResultsPage = () => {
   const [error, setError] = useState(null)
   const wsRef = useRef(null)
 
+  // Load saved result on mount
   useEffect(() => {
-    // Connect to WebSocket
+    const loadSavedResult = async () => {
+      try {
+        const response = await fetch(`/api/results/${analysisId}/`)
+        const data = await response.json()
+        
+        if (data.success && data.result) {
+          setResults(data.result)
+          setStatus('completed')
+          setProgress(100)
+          setMessage('Analysis complete!')
+          return true
+        }
+      } catch (err) {
+        console.log('No saved result found or error loading:', err)
+      }
+      return false
+    }
+
+    loadSavedResult().then((loaded) => {
+      if (!loaded) {
+        connectWebSocket()
+      }
+    })
+  }, [analysisId])
+
+  const connectWebSocket = () => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const wsUrl = `${protocol}//${window.location.host}/ws/analysis/${analysisId}/`
-    
-    console.log('Connecting to WebSocket:', wsUrl)
     
     try {
       const ws = new WebSocket(wsUrl)
       wsRef.current = ws
 
       ws.onopen = () => {
-        console.log('WebSocket connected')
         setStatus('connected')
         setMessage('Connected. Starting analysis...')
       }
 
       ws.onmessage = (event) => {
-        console.log('WebSocket message:', event.data)
         const data = JSON.parse(event.data)
 
         if (data.type === 'status') {
@@ -65,36 +505,34 @@ const ResultsPage = () => {
       setStatus('error')
     }
 
-    // Cleanup
     return () => {
       if (wsRef.current) {
         wsRef.current.close()
       }
     }
-  }, [analysisId])
-
-  // Helper function to safely get nested values
-  const getNestedValue = (obj, path, defaultValue = null) => {
-    return path.split('.').reduce((acc, part) => acc && acc[part], obj) || defaultValue
   }
 
-  // Extract image URL - support both old and new format
+  // Extract data helpers
+  const getMergedData = () => results?.merged || results
+  
   const getImageUrl = () => {
     if (!results) return null
-    // Try new format first (from product_information or root)
+    const merged = getMergedData()
+    
+    // Try multiple locations for the image URL
     return results.image_front_url || 
-           getNestedValue(results, 'product_information.image_front_url') ||
+           getNestedValue(results, 'raw_sources.ace.image_front_url') ||
+           getNestedValue(merged, 'product_information.image_front_url') ||
+           getNestedValue(merged, 'image_front_url') ||
            null
   }
-
-  // Extract scores - adapt to new format with _score suffix
+  
   const getScores = () => {
     if (!results) return null
+    const merged = getMergedData()
     
-    // Try new format first (scoring_results.scores)
-    let scores = results.scoring_results?.scores || results.scores || {}
+    let scores = merged.scoring_results?.scores || merged.scores || {}
     
-    // Map new format to display format (handle both _score suffix and without)
     const mappedScores = {
       attractiveness: scores.attractiveness_score ?? scores.attractiveness,
       utility: scores.utility_score ?? scores.utility,
@@ -102,21 +540,24 @@ const ResultsPage = () => {
       global: scores.global_score ?? scores.global
     }
     
-    // Return null only if all scores are undefined/null
     const hasAnyScore = Object.values(mappedScores).some(v => v !== undefined && v !== null)
     return hasAnyScore ? mappedScores : null
   }
-
-  // Extract product info - adapt to new nested structure
+  
   const getProductInfo = () => {
     if (!results) return {}
+    const merged = getMergedData()
     
-    const basicInfo = results.product_information?.basic_info || {}
-    const businessObj = results.business_objective || {}
+    const productInfo = merged.product_information || {}
+    const basicInfo = productInfo.basic_info || {}
+    const businessObj = merged.business_objective || results.input?.business_objective || {}
     
     return {
-      barcode: results.barcode || basicInfo.product_id,
-      objectives: businessObj.objective_description || results.objectives || results.business_objective,
+      barcode: results.input?.barcode || basicInfo.product_id || results.barcode,
+      objectives: businessObj.objective_description || 
+                  results.input?.business_objective || 
+                  results.objectives || 
+                  businessObj,
       name: basicInfo.name,
       brand: basicInfo.brand,
       category: basicInfo.category,
@@ -124,484 +565,310 @@ const ResultsPage = () => {
     }
   }
 
+  // Render states
   if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-          <div className="text-center">
-            <div className="text-6xl mb-4">⚠️</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+    return <ErrorScreen error={error} />
   }
 
   if (!results) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
-          <div className="text-center mb-6">
-            <div className="text-6xl mb-4">🔄</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Analyzing Your Product</h2>
-            <p className="text-gray-600">{message}</p>
-          </div>
-          
-          <div className="space-y-4">
-            <ProgressBar value={progress} max={100} label="Analysis Progress" />
-            
-            <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
-              <span>Processing...</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+    return <LoadingScreen message={message} progress={progress} />
   }
 
+  // Extract data
+  const merged = getMergedData()
   const scores = getScores()
   const imageUrl = getImageUrl()
   const productInfo = getProductInfo()
-  
-  // Debug: Log scores structure
-  if (results && !scores) {
-    console.log('⚠️ Scores not found. Results structure:', {
-      hasScoringResults: !!results.scoring_results,
-      scoringResults: results.scoring_results,
-      hasScores: !!results.scores,
-      scores: results.scores
-    })
-  }
-  
-  // Extract data from new format
-  const packagingProposals = results.packaging_improvement_proposals || []
-  const gtmStrategy = results.go_to_market_strategy || {}
-  const swotAnalysis = results.swot_analysis || {}
-  const imageAnalysis = results.image_analysis || {}
-  const evidenceExplanations = results.evidence_based_explanations || {}
-  const qualityInsights = results.quality_insights || {}
-  const criteriaBreakdown = results.scoring_results?.criteria_breakdown || {}
-  const confidenceLevel = results.scoring_results?.confidence_level
+  const confidenceLevel = merged?.scoring_results?.confidence_level || results?.status
 
+  // Render main content
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            📊 Analysis Dashboard
-          </h1>
-          <p className="text-gray-600">Analysis ID: {analysisId}</p>
-          {confidenceLevel && (
-            <p className="text-sm text-gray-500 mt-1">
-              Confidence Level: <span className="font-semibold capitalize">{confidenceLevel}</span>
-            </p>
-          )}
-        </div>
+    <div className="min-h-screen bg-white flex flex-col">
+      <Header />
+      <div className="container mx-auto px-4 py-8 max-w-7xl flex-1">
+        <PageHeader analysisId={analysisId} confidenceLevel={confidenceLevel} />
 
-        {/* Two Column Layout */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          
-          {/* LEFT COLUMN - Image & Scores */}
-          <div className="space-y-6">
-            
-            {/* Product Image - Only show if image_front_url exists */}
-            {imageUrl && (
-              <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
-                <h2 className="text-xl font-bold mb-4 text-gray-900">Product Image</h2>
-                <img
-                  src={imageUrl}
-                  alt="Product"
-                  className="w-full h-80 object-contain rounded-lg border-2 border-gray-200 bg-gray-50"
-                  onError={(e) => {
-                    e.target.style.display = 'none'
-                    e.target.parentElement.innerHTML = '<p class="text-gray-500 text-center py-8">Image not available</p>'
-                  }}
-                />
-              </div>
-            )}
+        {/* Tabs */}
+        <Tab.Group>
+          <Tab.List className="flex space-x-1 rounded-xl bg-gradient-to-r from-blue-100 to-indigo-100 p-1 mb-8 shadow-lg">
+            {['Overview', 'Competitor Intelligence', 'Marketing Strategy', 'Research Insights', 'ACE Analysis'].map((tab) => (
+              <Tab
+                key={tab}
+                className={({ selected }) =>
+                  classNames(
+                    'w-full rounded-lg py-3 px-4 text-sm font-semibold leading-5 transition-all duration-200',
+                    'focus:outline-none focus:ring-2 ring-offset-2 ring-offset-blue-400 ring-white ring-opacity-60',
+                    selected
+                      ? 'bg-white text-blue-700 shadow-md transform scale-105'
+                      : 'text-gray-700 hover:bg-white/[0.5] hover:text-blue-600'
+                  )
+                }
+              >
+                {tab}
+              </Tab>
+            ))}
+          </Tab.List>
 
-            {/* Product Details */}
-            <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
-              <h2 className="text-xl font-bold mb-4 text-gray-900">Product Details</h2>
-              <div className="space-y-3">
-                {productInfo.name && (
+          <Tab.Panels>
+            {/* Tab 1: Overview */}
+            <Tab.Panel>
+              <OverviewTab 
+                results={results}
+                merged={merged}
+                imageUrl={imageUrl}
+                productInfo={productInfo}
+                scores={scores}
+              />
+            </Tab.Panel>
+
+            {/* Tab 2: Competitor Intelligence */}
+            <Tab.Panel>
+              <div className="space-y-8">
+                {/* ACE Competitor Intelligence */}
+                {merged?.competitor_intelligence?.ace && (
                   <div>
-                    <p className="text-sm font-semibold text-gray-700">Product Name</p>
-                    <p className="text-gray-900">{productInfo.name}</p>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                        ACE Analysis
+                      </span>
+                      <h2 className="text-xl font-bold text-gray-900">📊 Real-Time Competitor Analysis</h2>
+                    </div>
+                    <CompetitorIntelligence data={merged.competitor_intelligence.ace} />
                   </div>
                 )}
-                {productInfo.brand && (
+                
+                {/* Essence Competitor Intelligence */}
+                {merged?.competitor_intelligence?.essence && (
                   <div>
-                    <p className="text-sm font-semibold text-gray-700">Brand</p>
-                    <p className="text-gray-900">{productInfo.brand}</p>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-semibold rounded-full">
+                        ESSENCE Analysis
+                      </span>
+                      <h2 className="text-xl font-bold text-gray-900">🔬 Research-Based Insights</h2>
+                    </div>
+                    <CompetitorIntelligence data={merged.competitor_intelligence.essence} />
                   </div>
                 )}
-                {productInfo.productId && (
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Product ID</p>
-                    <p className="text-gray-900 font-mono">{productInfo.productId}</p>
-                  </div>
-                )}
-                {productInfo.barcode && (
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Barcode</p>
-                    <p className="text-gray-900 font-mono">{productInfo.barcode}</p>
-                  </div>
-                )}
-                {productInfo.category && (
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Category</p>
-                    <p className="text-gray-900">{productInfo.category}</p>
-                  </div>
-                )}
-                {productInfo.objectives && (
-                  <div>
-                    <p className="text-sm font-semibold text-gray-700">Business Objectives</p>
-                    <p className="text-gray-900">{productInfo.objectives}</p>
+                
+                {/* Fallback if no data */}
+                {!merged?.competitor_intelligence?.ace && !merged?.competitor_intelligence?.essence && (
+                  <div className="text-center py-12 text-gray-500">
+                    <p className="text-lg">No competitor intelligence data available</p>
+                    <p className="text-sm mt-2">This data comes from ACE and EssenceAI analysis</p>
                   </div>
                 )}
               </div>
-            </div>
+            </Tab.Panel>
 
-            {/* Performance Scores */}
-            {scores && (
-              <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
-                <h2 className="text-xl font-bold mb-6 text-gray-900">Performance Scores</h2>
-                <div className="space-y-4">
-                  {(scores.attractiveness !== undefined && scores.attractiveness !== null) && (
-                    <ProgressBar
-                      value={Number(scores.attractiveness)}
-                      label="Attractiveness / Visibility"
-                      showValue={true}
-                    />
-                  )}
-                  {(scores.utility !== undefined && scores.utility !== null) && (
-                    <ProgressBar
-                      value={Number(scores.utility)}
-                      label="Utility & Value"
-                      showValue={true}
-                    />
-                  )}
-                  {(scores.positioning !== undefined && scores.positioning !== null) && (
-                    <ProgressBar
-                      value={Number(scores.positioning)}
-                      label="Positioning"
-                      showValue={true}
-                    />
-                  )}
-                  
-                  {/* Global Score - Highlighted */}
-                  {(scores.global !== undefined && scores.global !== null) && (
-                    <div className="mt-6 pt-6 border-t-2 border-gray-300">
-                      <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border-2 border-green-500">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-2xl">🏆</span>
-                            <h3 className="text-lg font-bold text-gray-900">Global Score</h3>
-                          </div>
-                          <div className="text-3xl font-bold text-green-600">
-                            {Number(scores.global).toFixed(1)}
-                            <span className="text-lg text-gray-500">/100</span>
-                          </div>
-                        </div>
-                        <div className="relative h-4 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500 shadow-lg"
-                            style={{ width: `${Number(scores.global)}%` }}
-                          >
-                            <div className="absolute inset-0 bg-white opacity-20 animate-pulse"></div>
-                          </div>
-                        </div>
-                        <p className="text-xs text-gray-600 mt-2 text-center italic">
-                          Overall performance based on all metrics
-                        </p>
+            {/* Tab 3: Marketing Strategy */}
+            <Tab.Panel>
+              {merged?.marketing_strategy_essence ? (
+                <>
+                  {merged.marketing_strategy?.ace && (
+                    <div className="mb-6">
+                      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                        <h3 className="text-lg font-semibold text-blue-900 mb-2">🤖 ACE Marketing Strategy</h3>
+                        <p className="text-sm text-blue-700">AI-powered strategic recommendations</p>
                       </div>
+                      <MarketingStrategyACE data={merged.marketing_strategy.ace} />
                     </div>
                   )}
+                  {merged.marketing_strategy?.essence && (
+                    <div>
+                      <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
+                        <h3 className="text-lg font-semibold text-green-900 mb-2">📚 Essence Marketing Strategy</h3>
+                        <p className="text-sm text-green-700">Research-backed insights</p>
+                      </div>
+                      <MarketingStrategyEssence data={merged.marketing_strategy.essence} />
+                    </div>
+                  )}
+                  {merged.marketing_strategy_essence && (
+                    <div>
+                      <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
+                        <h3 className="text-lg font-semibold text-green-900 mb-2">📚 Essence Marketing Strategy</h3>
+                        <p className="text-sm text-green-700">Research-backed insights</p>
+                      </div>
+                      <MarketingStrategyEssence data={merged.marketing_strategy_essence} />
+                    </div>
+                  )}
+                  {!merged.marketing_strategy?.ace && !merged.marketing_strategy?.essence && !merged.marketing_strategy_essence && (
+                    <div className="text-center py-12 text-gray-500">
+                      <p className="text-lg">No marketing strategy data available</p>
+                      <p className="text-sm mt-2">This data comes from EssenceAI analysis</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <p className="text-lg">No marketing strategy data available</p>
+                  <p className="text-sm mt-2">This data comes from EssenceAI analysis</p>
+                </div>
+              )}
+            </Tab.Panel>
+
+            {/* Tab 4: Research Insights */}
+            <Tab.Panel>
+              {merged?.research_insights_essence ? (
+                <>
+                  {merged.research_insights?.ace && (
+                    <div className="mb-6">
+                      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                        <h3 className="text-lg font-semibold text-blue-900 mb-2">🤖 ACE Research Insights</h3>
+                        <p className="text-sm text-blue-700">AI-powered market analysis</p>
+                      </div>
+                      <ResearchInsightsACE data={merged.research_insights.ace} />
+                    </div>
+                  )}
+                  {merged.research_insights?.essence && (
+                    <div>
+                      <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
+                        <h3 className="text-lg font-semibold text-green-900 mb-2">📚 Essence Research Insights</h3>
+                        <p className="text-sm text-green-700">Scientific research findings</p>
+                      </div>
+                      <ResearchInsights data={merged.research_insights.essence} />
+                    </div>
+                  )}
+                  {merged.research_insights_essence && (
+                    <div>
+                      <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
+                        <h3 className="text-lg font-semibold text-green-900 mb-2">📚 Essence Research Insights</h3>
+                        <p className="text-sm text-green-700">Scientific research findings</p>
+                      </div>
+                      <ResearchInsights data={merged.research_insights_essence} />
+                    </div>
+                  )}
+                  {!merged.research_insights?.ace && !merged.research_insights?.essence && !merged.research_insights_essence && (
+                    <div className="text-center py-12 text-gray-500">
+                      <p className="text-lg">No research insights data available</p>
+                      <p className="text-sm mt-2">This data comes from EssenceAI analysis of scientific papers</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <p className="text-lg">No research insights data available</p>
+                  <p className="text-sm mt-2">This data comes from EssenceAI analysis of scientific papers</p>
+                </div>
+              )}
+            </Tab.Panel>
+
+            {/* Tab 5: ACE Analysis */}
+            <Tab.Panel>
+              <ACEAnalysisTab merged={merged} />
+            </Tab.Panel>
+          </Tab.Panels>
+        </Tab.Group>
+
+        {/* Debug Panel */}
+        {results?.raw_sources && (
+          <div className="mt-8">
+            <Accordion title="Debug: Raw API Sources" icon="" defaultOpen={false}>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600 mb-4">
+                  This section shows the raw responses from ACE_Framework and EssenceAI APIs.
+                </p>
+                
+                {results.status && (
+                  <div className="bg-blue-50 p-3 rounded border border-blue-200">
+                    <p className="text-sm">
+                      <span className="font-semibold">Status:</span>{' '}
+                      <span className="capitalize">{results.status}</span>
+                    </p>
+                  </div>
+                )}
+
+                {results.raw_sources.ace && (
+                  <div className="bg-white p-4 rounded border border-gray-200">
+                    <h4 className="font-semibold text-sm mb-2 text-gray-800">
+                      ACE_Framework Raw Response
+                    </h4>
+                    <pre className="text-xs bg-gray-50 p-3 rounded overflow-auto max-h-96 border border-gray-100">
+                      {JSON.stringify(results.raw_sources.ace, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {results.raw_sources.essence && (
+                  <div className="bg-white p-4 rounded border border-gray-200">
+                    <h4 className="font-semibold text-sm mb-2 text-gray-800">
+                      EssenceAI Raw Response
+                    </h4>
+                    <pre className="text-xs bg-gray-50 p-3 rounded overflow-auto max-h-96 border border-gray-100">
+                      {JSON.stringify(results.raw_sources.essence, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </Accordion>
+          </div>
+        )}
+
+        {/* Visuals Section */}
+        {merged?.visuals && merged.visuals.length > 0 && (
+          <div className="mt-8">
+            <Accordion title="Visualizations" icon="" defaultOpen={false}>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600 mb-4">
+                  Charts and visualizations from the analysis.
+                </p>
+                <VisualsRenderer visuals={merged.visuals} />
+              </div>
+            </Accordion>
+          </div>
+        )}
+
+        {/* Complete Data */}
+        {merged && (
+          <div className="mt-8">
+            <Accordion title="Complete Analysis Data" icon="" defaultOpen={false}>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-600 mb-4">
+                  All analysis data from the unified output.
+                </p>
+                <div className="bg-white p-4 rounded border border-gray-200">
+                  <KeyValueRenderer data={merged} maxDepth={6} />
                 </div>
               </div>
-            )}
+            </Accordion>
+          </div>
+        )}
 
-            {/* Image Analysis - New Section */}
-            {imageAnalysis.package_description && (
-              <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.02] hover:shadow-3xl border border-gray-100">
-                <h2 className="text-xl font-bold mb-4 text-gray-900">Image Analysis</h2>
-                <p className="text-gray-700 mb-4">{imageAnalysis.package_description}</p>
-                
-                {imageAnalysis.visual_observations && imageAnalysis.visual_observations.length > 0 && (
-                  <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Visual Observations</h3>
-                    <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                      {imageAnalysis.visual_observations.map((obs, idx) => (
-                        <li key={idx}>{obs}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {imageAnalysis.detected_problems && imageAnalysis.detected_problems.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Detected Problems</h3>
-                    <div className="space-y-2">
-                      {imageAnalysis.detected_problems.map((problem, idx) => (
-                        <div key={idx} className="border-l-4 border-red-400 pl-3 py-2 bg-red-50 rounded">
-                          <p className="text-sm font-semibold text-gray-900">{problem.probleme}</p>
-                          {problem.indice_visuel && (
-                            <p className="text-xs text-gray-600 mt-1">💡 {problem.indice_visuel}</p>
-                          )}
-                          <div className="flex items-center space-x-2 mt-2">
-                            {problem.gravite && (
-                              <span className={`text-xs px-2 py-1 rounded ${
-                                problem.gravite === 'Important' || problem.gravite === 'Critique'
-                                  ? 'bg-red-200 text-red-800'
-                                  : 'bg-yellow-200 text-yellow-800'
-                              }`}>
-                                {problem.gravite}
-                              </span>
-                            )}
-                            {problem.impact && (
-                              <span className="text-xs text-gray-600">Impact: {problem.impact}</span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+        {/* Status Banner */}
+        {results?.status && (
+          <div className={`mt-8 p-4 rounded-lg border ${
+            results.status === 'ok' ? 'bg-green-50 border-green-200' :
+            results.status === 'partial' ? 'bg-yellow-50 border-yellow-200' :
+            'bg-red-50 border-red-200'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-sm">
+                  Analysis Status: <span className="capitalize">{results.status}</span>
+                </p>
+                {results.status === 'partial' && (
+                  <p className="text-xs mt-1 text-yellow-800">
+                    Some data may be missing. Check errors section for details.
+                  </p>
                 )}
               </div>
-            )}
-          </div>
-
-          {/* RIGHT COLUMN - Recommendations (Accordions) */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl shadow-2xl p-6 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-3xl border border-gray-100">
-              <h2 className="text-xl font-bold mb-4 text-gray-900">Strategic Recommendations</h2>
-              
-              {/* SWOT Analysis - Updated for new format */}
-              {(swotAnalysis.strengths || swotAnalysis.weaknesses || swotAnalysis.risks) && (
-                <Accordion title="SWOT Analysis" icon="📊" defaultOpen={true}>
-                  <div className="space-y-4">
-                    {swotAnalysis.strengths && swotAnalysis.strengths.length > 0 && (
-                      <div className="bg-green-50 p-3 rounded">
-                        <h4 className="font-semibold text-sm text-green-800 mb-2">💪 Strengths</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                          {swotAnalysis.strengths.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {swotAnalysis.weaknesses && swotAnalysis.weaknesses.length > 0 && (
-                      <div className="bg-red-50 p-3 rounded">
-                        <h4 className="font-semibold text-sm text-red-800 mb-2">⚠️ Weaknesses</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                          {swotAnalysis.weaknesses.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {swotAnalysis.risks && swotAnalysis.risks.length > 0 && (
-                      <div className="bg-yellow-50 p-3 rounded">
-                        <h4 className="font-semibold text-sm text-yellow-800 mb-2">⚡ Risks</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                          {swotAnalysis.risks.map((item, idx) => (
-                            <li key={idx}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </Accordion>
-              )}
-
-              {/* Packaging Improvements - Updated for string array */}
-              {packagingProposals && packagingProposals.length > 0 && (
-                <Accordion title="Packaging Improvements" icon="📦">
-                  <div className="space-y-4">
-                    {packagingProposals.map((proposal, index) => (
-                      <div key={index} className="border-l-4 border-green-500 pl-4 py-2 bg-white rounded">
-                        <p className="text-gray-700 text-sm">{typeof proposal === 'string' ? proposal : (proposal.title || proposal.description || proposal)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </Accordion>
-              )}
-
-              {/* Go-to-Market Strategy */}
-              {(gtmStrategy.shelf_positioning || gtmStrategy.regional_relevance || gtmStrategy.b2b_targeting) && (
-                <Accordion title="Go-to-Market Strategy" icon="🎯">
-                  <div className="space-y-4">
-                    {gtmStrategy.shelf_positioning && (
-                      <div className="bg-white p-3 rounded border border-gray-200">
-                        <h4 className="font-semibold text-sm mb-2">📍 Shelf Positioning</h4>
-                        <p className="text-sm text-gray-700">{gtmStrategy.shelf_positioning}</p>
-                      </div>
-                    )}
-                    {gtmStrategy.regional_relevance && (
-                      <div className="bg-white p-3 rounded border border-gray-200">
-                        <h4 className="font-semibold text-sm mb-2">🌍 Regional Relevance</h4>
-                        <p className="text-sm text-gray-700">{gtmStrategy.regional_relevance}</p>
-                      </div>
-                    )}
-                    {gtmStrategy.b2b_targeting && (
-                      <div className="bg-white p-3 rounded border border-gray-200">
-                        <h4 className="font-semibold text-sm mb-2">🤝 B2B Targeting</h4>
-                        <p className="text-sm text-gray-700">{gtmStrategy.b2b_targeting}</p>
-                      </div>
-                    )}
-                  </div>
-                </Accordion>
-              )}
-
-              {/* Evidence-Based Explanations - New Section */}
-              {(evidenceExplanations.attractiveness || evidenceExplanations.utility || 
-                evidenceExplanations.positioning || evidenceExplanations.global) && (
-                <Accordion title="Evidence-Based Explanations" icon="🔍">
-                  <div className="space-y-4">
-                    {evidenceExplanations.attractiveness && evidenceExplanations.attractiveness.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Attractiveness</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                          {evidenceExplanations.attractiveness.map((exp, idx) => (
-                            <li key={idx}>{exp}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {evidenceExplanations.utility && evidenceExplanations.utility.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Utility</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                          {evidenceExplanations.utility.map((exp, idx) => (
-                            <li key={idx}>{exp}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {evidenceExplanations.positioning && evidenceExplanations.positioning.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Positioning</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                          {evidenceExplanations.positioning.map((exp, idx) => (
-                            <li key={idx}>{exp}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {evidenceExplanations.global && evidenceExplanations.global.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Global</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                          {evidenceExplanations.global.map((exp, idx) => (
-                            <li key={idx}>{exp}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </Accordion>
-              )}
-
-              {/* Quality Insights - New Section */}
-              {(qualityInsights.reflector_analysis || qualityInsights.key_insights || qualityInsights.improvement_guidelines) && (
-                <Accordion title="Quality Insights" icon="💡">
-                  <div className="space-y-4">
-                    {qualityInsights.reflector_analysis && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Reflector Analysis</h4>
-                        <p className="text-sm text-gray-700">{qualityInsights.reflector_analysis}</p>
-                      </div>
-                    )}
-                    {qualityInsights.key_insights && qualityInsights.key_insights.length > 0 && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Key Insights</h4>
-                        <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                          {qualityInsights.key_insights.map((insight, idx) => (
-                            <li key={idx}>{insight}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {qualityInsights.improvement_guidelines && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Improvement Guidelines</h4>
-                        <p className="text-sm text-gray-700">{qualityInsights.improvement_guidelines}</p>
-                      </div>
-                    )}
-                  </div>
-                </Accordion>
-              )}
-
-              {/* Criteria Breakdown - New Section */}
-              {Object.keys(criteriaBreakdown).length > 0 && (
-                <Accordion title="Criteria Breakdown" icon="📋">
-                  <div className="space-y-4">
-                    {criteriaBreakdown.attractiveness && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Attractiveness</h4>
-                        <div className="text-sm text-gray-700 space-y-1">
-                          {Object.entries(criteriaBreakdown.attractiveness).map(([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="capitalize">{key.replace(/_/g, ' ')}:</span>
-                              <span className="font-semibold">{String(value)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {criteriaBreakdown.utility && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Utility</h4>
-                        <div className="text-sm text-gray-700 space-y-1">
-                          {Object.entries(criteriaBreakdown.utility).map(([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="capitalize">{key.replace(/_/g, ' ')}:</span>
-                              <span className="font-semibold">{String(value)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {criteriaBreakdown.positioning && (
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">Positioning</h4>
-                        <div className="text-sm text-gray-700 space-y-1">
-                          {Object.entries(criteriaBreakdown.positioning).map(([key, value]) => (
-                            <div key={key} className="flex justify-between">
-                              <span className="capitalize">{key.replace(/_/g, ' ')}:</span>
-                              <span className="font-semibold">{String(value)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </Accordion>
+              {results.errors && results.errors.length > 0 && (
+                <div className="text-xs text-red-700">
+                  {results.errors.length} error(s)
+                </div>
               )}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Back Button */}
-        <div className="text-center mt-8">
-          <a
-            href="/"
-            className="inline-block px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold shadow-md"
-          >
-            ← Analyze Another Product
+        <div className="text-center mt-12 mb-8">
+          <a href="/" className="btn-primary inline-flex items-center space-x-2">
+            <span>←</span>
+            <span>Analyze Another Product</span>
           </a>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

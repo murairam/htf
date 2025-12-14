@@ -1,4 +1,4 @@
-.PHONY: help install dev prod fastapi clean fclean rebuild test migrate
+.PHONY: help install dev prod fastapi all-services stop-services check-services clean fclean rebuild test migrate
 
 # Colors for output
 GREEN := \033[0;32m
@@ -35,14 +35,32 @@ prod: ## Start production server (Django serving React build)
 	@echo "$(YELLOW)Access: http://localhost:8000$(NC)"
 	./run_prod.sh
 
-fastapi: ## Start only FastAPI service
-	@echo "$(GREEN)Starting FastAPI service...$(NC)"
+api-agent: ## Start only API_Final_Agent service
+	@echo "$(GREEN)Starting API_Final_Agent service...$(NC)"
 	@echo "$(YELLOW)Access: http://localhost:8001$(NC)"
-	./run_fastapi.sh
+	cd API_Final_Agent && python main.py
+
+all-services: rebuild ## Start all services (API_Final_Agent + Django) with fresh frontend build
+	@echo "$(GREEN)Starting all services...$(NC)"
+	@echo "$(YELLOW)Django: http://localhost:8000$(NC)"
+	@echo "$(YELLOW)API_Final_Agent: http://localhost:8001$(NC)"
+	./run_all_services.sh
+
+stop-services: ## Stop all background services
+	@echo "$(GREEN)Stopping all services...$(NC)"
+	./stop_all_services.sh
+
+check-services: ## Check status of all services
+	./check_services.sh
 
 rebuild: ## Rebuild frontend and collect static files
 	@echo "$(GREEN)Rebuilding frontend...$(NC)"
-	./rebuild_frontend.sh
+	cd frontend && npm run build
+	@echo "$(GREEN)Copying frontend build to Django static...$(NC)"
+	cp -r frontend/dist/* backend/static/react/
+	@echo "$(GREEN)Collecting static files...$(NC)"
+	python manage.py collectstatic --noinput
+	@echo "$(GREEN)Frontend rebuild complete!$(NC)"
 
 migrate: ## Run database migrations
 	@echo "$(GREEN)Running migrations...$(NC)"
@@ -97,13 +115,6 @@ format: ## Format code (Python with black, JS with prettier)
 	cd frontend && npx prettier --write "src/**/*.{js,jsx}" 2>/dev/null || echo "prettier not installed, skipping..."
 	@echo "$(GREEN)Formatting complete!$(NC)"
 
-status: ## Show service status
-	@echo "$(GREEN)Checking services...$(NC)"
-	@echo "$(YELLOW)Django:$(NC)"
-	@curl -s http://localhost:8000 > /dev/null && echo "  ✓ Running" || echo "  ✗ Not running"
-	@echo "$(YELLOW)React:$(NC)"
-	@curl -s http://localhost:5173 > /dev/null && echo "  ✓ Running" || echo "  ✗ Not running"
-	@echo "$(YELLOW)FastAPI:$(NC)"
-	@curl -s http://localhost:8001 > /dev/null && echo "  ✓ Running" || echo "  ✗ Not running"
+status: check-services ## Alias for check-services
 
 .DEFAULT_GOAL := help

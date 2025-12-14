@@ -7,4 +7,5 @@ urlpatterns = [
     path('', views.index, name='home'),
     path('submit/', views.submit_analysis, name='submit'),
     path('results/<uuid:analysis_id>/', views.results, name='results'),
+    path('api/results/<uuid:analysis_id>/', views.get_analysis_result, name='get_result'),
 ]
