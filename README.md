@@ -1,381 +1,570 @@
-# 🌱 Plant-Based Packaging Intelligence
+# PlantMarket Advisor
 
-**AI-powered marketing & packaging analysis for plant-based food innovation**
+**AI-Powered Packaging Analysis and Go-to-Market Strategy for Plant-Based Food Products**
 
----
-
-## 🧠 Problem
-
-Plant-based food companies face a high failure rate when launching new products:
-- packaging does not clearly communicate value or utility,
-- consumers distrust ultra-processed or "greenwashed" products,
-- pricing is often misaligned with perceived benefits,
-- go-to-market decisions (shelf placement, B2B targeting) rely on costly and slow market studies.
-
-Early-stage startups and food innovators lack **fast, affordable, and science-informed tools** to evaluate how their products will be perceived **before** going to market.
+PlantPack Intelligence is a multi-agent system that analyzes plant-based food products using structured data, packaging image analysis, and business objectives. It produces explainable scores across four dimensions and generates actionable go-to-market recommendations specifically tailored to the plant-based food ecosystem.
 
 ---
 
-## 💡 Solution Overview
+## Table of Contents
 
-**Plant-Based Packaging Intelligence** is an AI-driven system that analyzes plant-based food products using:
-- product identification data (barcode),
-- business objectives provided by the company.
-
-The system produces **interpretable scores** and a **strategic marketing analysis** tailored specifically to the plant-based food ecosystem.
+1. [Problem Statement](#problem-statement)
+2. [Solution Overview](#solution-overview)
+3. [System Architecture](#system-architecture)
+4. [Multi-Agent Pipeline](#multi-agent-pipeline)
+5. [Scoring Methodology](#scoring-methodology)
+6. [Input Specification](#input-specification)
+7. [Output Specification](#output-specification)
+8. [Playbook System](#playbook-system)
+9. [Technology Stack](#technology-stack)
+10. [Installation](#installation)
+11. [Usage](#usage)
+12. [API Reference](#api-reference)
+13. [Project Structure](#project-structure)
+14. [Configuration](#configuration)
+15. [Testing](#testing)
+16. [Troubleshooting](#troubleshooting)
+17. [Disclaimer](#disclaimer)
 
 ---
 
-## 🏗️ Architecture
+## Problem Statement
 
-### Technology Stack
+Plant-based food companies face significant challenges when launching new products:
 
-**Frontend:**
+- Packaging frequently fails to communicate value proposition or utility clearly
+- Consumers increasingly distrust products perceived as ultra-processed or greenwashed
+- Pricing strategies are often misaligned with perceived benefits and market expectations
+- Go-to-market decisions (shelf placement, B2B targeting, regional expansion) rely on costly and slow market studies
+- French and European regulations (AGEC, Triman, REACH) create compliance complexity
+
+Early-stage startups and food innovators lack fast, affordable, and evidence-based tools to evaluate how their products will be perceived before market launch.
+
+---
+
+## Solution Overview
+
+PlantPack Intelligence addresses these challenges through an AI-driven analysis system that combines:
+
+- **Product Data Normalization**: Extracts and normalizes critical fields from OpenFoodFacts for plant-based analysis
+- **Packaging Image Analysis**: Uses GPT Vision to analyze packaging design, claims, and visual communication
+- **Multi-Dimensional Scoring**: Evaluates products across four weighted dimensions with detailed evidence
+- **Evolving Knowledge Base**: Learns from each analysis through an evolving playbook system
+- **Actionable Recommendations**: Generates specific packaging improvements and go-to-market strategies
+
+The system produces interpretable scores and strategic marketing analysis specifically calibrated for the plant-based food ecosystem in France and Europe.
+
+---
+
+## System Architecture
+
+### High-Level Architecture
+
+```
++-----------------------------------------------------------------------------------+
+|                              PLANTPACK INTELLIGENCE                                |
++-----------------------------------------------------------------------------------+
+|                                                                                    |
+|   FRONTEND (React + Vite)                                                         |
+|   +------------------+  +------------------+  +------------------+                 |
+|   | Barcode Scanner  |  | Objective Input  |  | Results Display  |                |
+|   | (QuaggaJS)       |  | (Business Goals) |  | (Scores + SWOT)  |                |
+|   +--------+---------+  +--------+---------+  +--------+---------+                |
+|            |                     |                     ^                          |
+|            +----------+----------+                     |                          |
+|                       |                                |                          |
+|                       v                                |                          |
+|   BACKEND (Django + Channels)                          |                          |
+|   +--------------------------------------------------+ |                          |
+|   | WebSocket Handler | REST API | Redis Pub/Sub     | |                          |
+|   +--------------------------------------------------+ |                          |
+|                       |                                |                          |
+|                       v                                |                          |
+|   LLM SERVICE (FastAPI)                                |                          |
+|   +--------------------------------------------------+ |                          |
+|   | OpenFoodFacts    | GPT-4 Vision | ACE Pipeline   |-+                          |
+|   | Data Retrieval   | Image Analysis| Multi-Agent   |                            |
+|   +--------------------------------------------------+                            |
+|                       |                                                           |
+|                       v                                                           |
+|   +--------------------------------------------------+                            |
+|   |                 PLAYBOOK (JSON)                   |                           |
+|   |  Evolving Knowledge Base for Plant-Based Analysis |                           |
+|   +--------------------------------------------------+                            |
+|                                                                                    |
++-----------------------------------------------------------------------------------+
+```
+
+### Data Flow
+
+1. User submits product barcode and business objectives via frontend
+2. Django backend creates analysis record and returns analysis_id
+3. Frontend opens WebSocket connection for real-time updates
+4. Django consumer calls FastAPI /run-analysis endpoint
+5. FastAPI service retrieves product data from OpenFoodFacts, normalizes fields, retrieves product image, runs GPT Vision analysis, executes ACE pipeline, and returns complete analysis
+6. Django relays results via WebSocket
+7. Frontend displays scores, SWOT analysis, and recommendations
+
+---
+
+## Multi-Agent Pipeline
+
+PlantPack Intelligence uses an Agentic Context Engineering (ACE) architecture with three specialized agents.
+
+### Pipeline Architecture
+
+```
++-----------------------------------------------------------------------------------+
+|                              ACE PIPELINE                                          |
++-----------------------------------------------------------------------------------+
+|                                                                                    |
+|   INPUTS                                                                          |
+|   +----------------+     +----------------+     +----------------+                 |
+|   | Product Data   |     | Image Analysis |     | Business       |                |
+|   | (Normalized)   |     | (GPT Vision)   |     | Objective      |                |
+|   +-------+--------+     +-------+--------+     +-------+--------+                |
+|           |                      |                      |                         |
+|           +----------------------+----------------------+                         |
+|                                  |                                                |
+|                                  v                                                |
+|                    +----------------------------+                                 |
+|                    |      PLAYBOOK              |<------------------+             |
+|                    | (Accumulated Knowledge)    |                   |             |
+|                    +-------------+--------------+                   |             |
+|                                  |                                  |             |
+|                                  v                                  |             |
+|   +----------------------------------------------------------------------+        |
+|   |                      GENERATOR AGENT                                 |        |
+|   |  - Analyzes product data, image, and playbook knowledge             |        |
+|   |  - Applies 4-dimension scoring with evidence                         |        |
+|   |  - Generates SWOT analysis and GTM recommendations                   |        |
+|   +----------------------------------------------------------------------+        |
+|                                  |                                                |
+|                                  v                                                |
+|   +----------------------------------------------------------------------+        |
+|   |                      REFLECTOR AGENT                                 |        |
+|   |  - Audits Generator analysis quality                                 |        |
+|   |  - Identifies reasoning flaws and inconsistencies                    |        |
+|   |  - Extracts generalizable insights                                   |        |
+|   +----------------------------------------------------------------------+        |
+|                                  |                                                |
+|                                  v                                                |
+|   +----------------------------------------------------------------------+        |
+|   |                      CURATOR AGENT                                   |        |
+|   |  - Converts insights into playbook bullets                           |--------+
+|   |  - Adds new rules to appropriate sections                            |
+|   |  - Only agent that modifies playbook                                 |
+|   +----------------------------------------------------------------------+
+|                                  |
+|                                  v
+|                    +----------------------------+
+|                    |          OUTPUT            |
+|                    | Complete Intelligence      |
+|                    +----------------------------+
++-----------------------------------------------------------------------------------+
+```
+
+### Agent Responsibilities
+
+**Generator Agent**: Primary analysis agent that produces scores, SWOT analysis, and recommendations. Reads playbook but does not modify it.
+
+**Reflector Agent**: Quality assurance agent that audits Generator output, identifies flaws, and extracts learnable insights. Does not modify playbook.
+
+**Curator Agent**: Knowledge management agent that converts Reflector insights into playbook bullets. Only agent authorized to modify playbook.
+
+---
+
+## Scoring Methodology
+
+### Fixed Weighting Model
+
+```
+TOTAL_SCORE = (ENVIRONMENTAL_IMPACT x 0.40) + 
+              (PRODUCTION_QUALITY x 0.30) + 
+              (CONSUMER_EXPERIENCE x 0.20) + 
+              (PLANT_BASED_SPECIFICITY x 0.10)
+```
+
+### Dimension 1: Environmental Impact (40%)
+
+Evaluates the ecological footprint of the packaging.
+
+| Sub-dimension | Description |
+|---------------|-------------|
+| Recyclability and End-of-Life | Capacity to be recycled in France (infrastructure, mono-material, sorting instructions) |
+| Material Sourcing and Origin | Sustainability of materials (recycled content, FSC/PEFC, bio-sourced, traceability) |
+| Weight and Volume Reduction | Material optimization (weight, empty space, decorative elements) |
+| Reuse and Circular Economy | Reuse potential (deposit system, refillable design, bulk options) |
+
+### Dimension 2: Production Quality (30%)
+
+Evaluates the technical performance of the packaging.
+
+| Sub-dimension | Description |
+|---------------|-------------|
+| Product Protection and Barriers | Barriers against oxidation, moisture, light, shocks; shelf life impact |
+| Manufacturing Compatibility | Inks, adhesives, additives compatible with recycling (NIR, separability) |
+| Functional Design | Ergonomics (opening, portioning, resealing, microwave/fridge compatibility) |
+
+### Dimension 3: Consumer Experience (20%)
+
+Evaluates attractiveness and practicality.
+
+| Sub-dimension | Description |
+|---------------|-------------|
+| Aesthetic and Brand Appeal | Visual attractiveness, plant-based value coherence, greenwashing absence |
+| Practical Utility and Convenience | Daily use (portability, formats, refills, innovations) |
+| Information and Education | Sorting/recycling clarity, QR codes, date legibility, anti-littering |
+
+### Dimension 4: Plant-Based Specificity (10%)
+
+Evaluates adaptation to plant-based products and regulatory compliance.
+
+| Sub-dimension | Description |
+|---------------|-------------|
+| Regulatory Compliance | AGEC/REACH compliance (Triman, claims, prohibited substances) - ELIMINATORY |
+| Plant-Based Product Adaptation | Adaptation to plant-based constraints (oxidation, concentrated formats) |
+| Supply Chain Optimization | Logistics (stackability, right-sizing, B2B reusability) |
+
+**Default Score**: 50.0 if data unavailable
+
+**Eliminatory Rule**: Regulatory violation sets total_score to 0
+
+---
+
+## Input Specification
+
+### Product Data Structure
+
+```json
+{
+  "product_id": "3760020507350",
+  "name": "La Vie Jambon Vegetal",
+  "brand": "La Vie",
+  "plant_based_category": "meat_alternatives",
+  "ingredients_text": "Eau, farine de ble, huile de tournesol...",
+  "ingredients_count": 15,
+  "additives_count": 3,
+  "nova_group": 4,
+  "nutriscore": "A",
+  "nutriments": {
+    "proteins_100g": 16.0,
+    "fiber_100g": 2.5,
+    "salt_100g": 1.8,
+    "sugars_100g": 0.5
+  },
+  "labels": ["vegan", "organic"],
+  "packaging": {
+    "materials": ["plastic", "cardboard"],
+    "recyclable": true
+  },
+  "origin": "France",
+  "countries": ["France", "Belgium"],
+  "image_front_url": "https://images.openfoodfacts.org/..."
+}
+```
+
+### Image Analysis Structure
+
+```json
+{
+  "image_description": "Modern packaging with green and pink colors, prominent VEGETAL claim...",
+  "observations": [
+    "Clear plant-based positioning with leaf iconography",
+    "Premium shelf presence with matte finish"
+  ],
+  "problemes_detectes": [
+    {
+      "probleme": "Small ingredient list difficult to read",
+      "indice_visuel": "Font size below 8pt",
+      "gravite": "Mineur",
+      "impact": "consumer_experience"
+    }
+  ]
+}
+```
+
+### Business Objective
+
+Natural language description of the company's primary goal:
+- "Improve shelf attractiveness in retail"
+- "Reduce perception of ultra-processed food"
+- "Justify premium pricing positioning"
+- "Adapt packaging for B2B foodservice buyers"
+
+---
+
+## Output Specification
+
+### Complete Analysis Report
+
+```json
+{
+  "export_metadata": {
+    "export_date": "2025-12-13T15:30:00",
+    "export_type": "PlantPack Intelligence - Complete Report",
+    "version": "1.0.0"
+  },
+  
+  "business_objective": {
+    "objective_key": "increase_flexitarian_appeal",
+    "objective_description": "Increase Flexitarian Appeal",
+    "scoring_weights": {
+      "environmental_impact": 0.40,
+      "production_quality": 0.30,
+      "consumer_experience": 0.20,
+      "plant_based_specificity": 0.10
+    }
+  },
+  
+  "scoring_results": {
+    "confidence_level": "high",
+    "used_bullet_ids": ["sr-00001", "pbh-00002"],
+    "compliance": {
+      "regulatory_compliance": "pass",
+      "issues": []
+    },
+    "scores": {
+      "environmental_impact_score": 65.0,
+      "production_quality_score": 70.0,
+      "consumer_experience_score": 75.0,
+      "plant_based_specificity_score": 80.0,
+      "total_score": 69.5
+    },
+    "score_breakdown": {
+      "environmental_impact": {
+        "recyclability": {
+          "score": 70.0,
+          "evidence": ["Detailed explanation of recyclability assessment..."]
+        }
+      }
+    }
+  },
+  
+  "swot_analysis": {
+    "strengths": ["Recyclable materials", "AGEC compliant", "Clear positioning"],
+    "weaknesses": ["No FSC certification", "No circular economy features"],
+    "risks": ["Evolving regulations", "Rising sustainability expectations"]
+  },
+  
+  "packaging_improvement_proposals": [
+    "Obtain FSC certification for cardboard components",
+    "Incorporate 30% recycled PET in tray"
+  ],
+  
+  "go_to_market_strategy": {
+    "shelf_positioning": "Premium plant-based section at eye level",
+    "b2b_targeting": "Flexitarian-friendly restaurant chains",
+    "regional_relevance": "Strong fit for urban French markets"
+  }
+}
+```
+
+---
+
+## Playbook System
+
+The playbook is an evolving knowledge base that accumulates learnings from each analysis.
+
+### Playbook Sections
+
+| Section | Purpose |
+|---------|---------|
+| scoring_rules | Quantitative rules for calculating dimension scores |
+| plant_based_heuristics | Category-specific decision guidelines |
+| ultra_processing_pitfalls | Common mistakes related to NOVA, additives, clean label |
+| packaging_patterns | Material choices, certifications, greenwashing detection |
+| go_to_market_rules | Market positioning, channel selection, pricing |
+
+### Example Bullets
+
+```json
+{
+  "scoring_rules": [
+    "Products with NOVA 4 + >15 additives should cap production_quality at 45/100",
+    "Non-recyclable packaging reduces environmental_impact by 15-20 points"
+  ],
+  "plant_based_heuristics": [
+    "Meat alternatives require protein >15g/100g for consumer_experience >70"
+  ],
+  "packaging_patterns": [
+    "Missing Triman symbol = regulatory_compliance fail"
+  ]
+}
+```
+
+---
+
+## Technology Stack
+
+### Frontend
 - React 18 with Vite
-- Tailwind CSS for styling
-- QuaggaJS for barcode scanning
-- WebSocket for real-time updates
+- Tailwind CSS
+- QuaggaJS (barcode scanning)
+- WebSocket (real-time updates)
 
-**Backend:**
-- Django 5.0 (Python web framework)
-- Django Channels (WebSocket support)
-- Redis (WebSocket channel layer)
+### Backend
+- Django 5.0
+- Django Channels (WebSocket)
+- Redis (channel layer)
 - Daphne (ASGI server)
 
-**LLM Service:**
-- FastAPI (separate service on port 8001)
-- OpenAI GPT-4 integration
-- OpenFoodFacts API integration
-- ACE Framework for structured analysis
-
-### System Flow
-
-1. User submits product barcode and business objectives
-2. Django creates analysis record and returns analysis_id
-3. Frontend opens WebSocket connection
-4. Django consumer calls FastAPI `/run-analysis` endpoint with:
-   - analysis_id
-   - barcode
-   - objectives
-5. FastAPI service:
-   - Looks up product from OpenFoodFacts
-   - Extracts `image_front_url` from product data
-   - Runs LLM analysis with GPT-4
-   - Returns complete JSON with scores, recommendations, and image URL
-6. Django relays final result via WebSocket
-7. Frontend displays results with conditional image rendering
+### LLM Service
+- FastAPI
+- OpenAI GPT-4 / GPT-4 Vision
+- OpenFoodFacts API
 
 ---
 
-## 🔌 Inputs
-
-The solution takes **two required inputs**:
-
-### 1️⃣ Product Barcode (Required)
-- EAN / UPC barcode
-- Camera scanning with QuaggaJS
-- Manual fallback input
-- Used to retrieve product data from OpenFoodFacts
-- Product image automatically fetched via `image_front_url`
-
-### 2️⃣ Business Objectives (Required)
-A natural language prompt defined by the company, for example:
-- *"Improve shelf attractiveness in retail"*
-- *"Reduce perception of ultra-processed food"*
-- *"Adapt packaging for B2B foodservice buyers"*
-
-**Note**: No image upload required - product images are automatically retrieved from OpenFoodFacts database.
-
----
-
-## 📊 Outputs
-
-### 🎯 Product Scores (0-100)
-
-| Score | Description |
-|------|------------|
-| **Attractiveness Score** | Visual and emotional appeal of the packaging |
-| **Price Score** | Coherence between price, product promise, and market expectations |
-| **Utility Score** | Perceived usefulness (nutrition, usage, clarity of benefits) |
-| **Global Score** | Weighted synthesis aligned with the company's objective |
-
-### 🧭 Strategic Analysis
-
-- **SWOT Analysis**: Strengths, weaknesses, opportunities, threats
-- **Packaging Improvements**: Specific recommendations with priority levels
-- **Go-to-Market Strategy**: Shelf positioning, regional relevance, B2B targeting
-
-### 🖼️ Product Image
-
-- Automatically retrieved from OpenFoodFacts via `image_front_url`
-- Displayed only if available in the database
-- No manual upload required
-
----
-
-## 🚀 Installation & Setup
+## Installation
 
 ### Prerequisites
 
 - Python 3.10+
 - Node.js 18+
-- Redis (for production WebSocket)
+- Redis (production)
 - OpenAI API key
 
-### 1. Clone the Repository
+### Backend Setup
 
 ```bash
-git clone <repository-url>
-cd htf
-```
-
-### 2. Backend Setup (Django)
-
-```bash
-# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate
 pip install -r requirements.txt
-
-# Run migrations
 python manage.py migrate
-
-# Create superuser (optional)
-python manage.py createsuperuser
 ```
 
-### 3. Frontend Setup (React)
+### Frontend Setup
 
 ```bash
 cd frontend
 npm install
-cd ..
 ```
 
-### 4. FastAPI Service Setup
+### LLM Service Setup
 
 ```bash
-cd ACE_Framwork
-
-# Create virtual environment
+cd ACE_Framework
 python -m venv venv
 source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Set OpenAI API key
-export OPENAI_API_KEY='your-openai-api-key-here'
-```
-
-### 5. Redis Setup (Production)
-
-**Ubuntu/Debian:**
-```bash
-sudo apt-get install redis-server
-sudo systemctl start redis
-```
-
-**macOS:**
-```bash
-brew install redis
-brew services start redis
+export OPENAI_API_KEY='your-key'
 ```
 
 ---
 
-## 🎮 Running the Application
+## Usage
 
 ### Development Mode
 
-**Terminal 1 - FastAPI Service:**
+Terminal 1:
 ```bash
 ./run_fastapi.sh
 ```
 
-**Terminal 2 - Django + React:**
+Terminal 2:
 ```bash
 ./run_dev.sh
 ```
 
-Access the application:
-- **Frontend**: http://localhost:5173
-- **Django Backend**: http://localhost:8000
-- **FastAPI Service**: http://localhost:8001
+Access: http://localhost:5173 (frontend), http://localhost:8001 (API)
 
-### Production Mode
+### Command Line
 
-**Terminal 1 - FastAPI Service:**
 ```bash
-./run_fastapi.sh
+python cli.py analyze --barcode 3760020507350 --objective "increase_flexitarian_appeal"
+python cli.py playbook stats
 ```
 
-**Terminal 2 - Django (with built React):**
+### Streamlit Interface
+
 ```bash
-./run_prod.sh
-```
-
-Access the application:
-- **Application**: http://localhost:8000
-- **FastAPI Service**: http://localhost:8001
-
----
-
-## 📁 Project Structure
-
-```
-htf/
-├── config/                      # Django project settings
-│   ├── settings.py             # Main settings
-│   ├── urls.py                 # URL routing
-│   ├── asgi.py                 # ASGI configuration
-│   └── wsgi.py                 # WSGI configuration
-│
-├── marketing_analyzer/          # Main Django app
-│   ├── models.py               # Analysis data model (no image field)
-│   ├── views.py                # HTTP views (submit, results)
-│   ├── consumers.py            # WebSocket consumer
-│   ├── routing.py              # WebSocket routing
-│   ├── fastapi_client.py       # FastAPI integration
-│   ├── urls.py                 # App URL patterns
-│   ├── templates/              # Django templates
-│   └── migrations/             # Database migrations
-│
-├── frontend/                    # React frontend (Vite)
-│   ├── src/
-│   │   ├── components/         # Reusable components
-│   │   │   ├── BarcodeScanner.jsx
-│   │   │   ├── ProgressBar.jsx
-│   │   │   └── Accordion.jsx
-│   │   ├── pages/              # Page components
-│   │   │   ├── HomePage.jsx    # No image upload
-│   │   │   └── ResultsPage.jsx # Conditional image display
-│   │   ├── App.jsx             # Main app component
-│   │   └── main.jsx            # Entry point
-│   ├── package.json
-│   ├── vite.config.js
-│   └── tailwind.config.js
-│
-├── ACE_Framwork/               # FastAPI LLM service
-│   ├── api.py                  # FastAPI endpoints
-│   ├── requirements.txt
-│   └── ...
-│
-├── run_dev.sh                  # Development launcher
-├── run_prod.sh                 # Production launcher
-├── run_fastapi.sh              # FastAPI service launcher
-├── requirements.txt            # Python dependencies
-└── README.md                   # This file
+cd ACE_Framework
+streamlit run app.py
 ```
 
 ---
 
-## 🔧 Configuration
+## API Reference
+
+### POST /submit/
+Submit analysis request. Returns analysis_id.
+
+### WebSocket /ws/analysis/<id>/
+Real-time progress updates and final results.
+
+### POST /run-analysis
+Execute complete LLM analysis pipeline.
+
+### GET /playbook/stats
+Retrieve playbook statistics.
+
+---
+
+## Project Structure
+
+```
+plantpack-intelligence/
+|-- config/                     # Django settings
+|-- marketing_analyzer/         # Django application
+|-- frontend/                   # React frontend
+|-- ACE_Framework/              # FastAPI LLM service
+|   |-- agents.py               # Multi-agent pipeline
+|   |-- api.py                  # FastAPI endpoints
+|   |-- playbook.py             # Playbook management
+|   |-- product_data.py         # OpenFoodFacts client
+|   +-- playbook.json           # Knowledge base
+|-- run_dev.sh
+|-- run_prod.sh
++-- run_fastapi.sh
+```
+
+---
+
+## Configuration
 
 ### Environment Variables
 
-**Django (config/settings.py):**
-- `DEBUG`: Set to `False` in production
-- `SECRET_KEY`: Change in production
-- `ALLOWED_HOSTS`: Add your domain in production
-- `FASTAPI_URL`: FastAPI service URL (default: http://localhost:8001)
-- `FASTAPI_TIMEOUT`: Request timeout in seconds (default: 60)
+Django:
+- DEBUG, SECRET_KEY, ALLOWED_HOSTS
+- FASTAPI_URL (default: http://localhost:8001)
+- FASTAPI_TIMEOUT (default: 60)
 
-**FastAPI (ACE_Framwork):**
-- `OPENAI_API_KEY`: Your OpenAI API key (required)
+FastAPI:
+- OPENAI_API_KEY (required)
 
 ---
 
-## 🧪 Testing
+## Testing
 
-### Test Barcode Examples
+### Test Barcodes
 
-- **3017620422003** - Nutella (Ferrero)
-- **3017624010701** - Kinder Bueno
-- **8076809513623** - Barilla Pasta
-- **5449000000996** - Coca-Cola
-
-### Manual Testing Flow
-
-1. Start FastAPI service
-2. Start Django + React
-3. Open http://localhost:5173 (dev) or http://localhost:8000 (prod)
-4. Scan or enter a barcode
-5. Enter business objectives
-6. Submit and watch real-time analysis
-7. Review scores and recommendations
-8. Product image displays automatically if available
+| Barcode | Product |
+|---------|---------|
+| 3760020507350 | La Vie Jambon Vegetal |
+| 3274080005003 | Cristaline Water |
+| 3017620422003 | Nutella |
 
 ---
 
-## 📝 API Documentation
+## Troubleshooting
 
-### Django Endpoints
+**FastAPI not running**: Check with `curl http://localhost:8001/`
 
-**POST /submit/**
-- Submit new analysis request
-- Body: `multipart/form-data` with `barcode`, `objectives`
-- Returns: `{ "analysis_id": "uuid", "redirect_url": "/results/uuid/" }`
+**WebSocket failed**: Verify Redis is running
 
-**GET /results/<analysis_id>/**
-- View analysis results page
-- Returns: HTML page with React app
+**Context length exceeded**: Playbook is automatically truncated
 
-**WebSocket /ws/analysis/<analysis_id>/**
-- Real-time analysis updates
-- Messages:
-  - Status: `{ "type": "status", "status": "processing", "progress": 60, "message": "..." }`
-  - Result: `{ "type": "final_result", "payload": {...} }`
-  - Error: `{ "type": "status", "status": "error", "message": "..." }`
-
-### FastAPI Endpoints
-
-**GET /**
-- Health check
-- Returns: `{ "status": "ok" }`
-
-**POST /run-analysis**
-- Run complete LLM analysis
-- Body: `{ "analysis_id": "uuid", "barcode": "1234567890123", "objectives": "..." }`
-- Returns: Complete JSON with:
-  - `image_front_url`: Product image from OpenFoodFacts
-  - `scoring_results`: Scores (attractiveness, price, utility, global)
-  - `swot_analysis`: SWOT analysis
-  - `packaging_improvement_proposals`: Recommendations
-  - `go_to_market_strategy`: GTM strategy
+**No product image**: Normal if product not in OpenFoodFacts
 
 ---
 
-## 🐛 Troubleshooting
+## Disclaimer
 
-### FastAPI Service Not Running
-```bash
-# Check if service is running
-curl http://localhost:8001/
+PlantPack Intelligence is a prototype decision-support tool. Scores and analyses are AI-driven indicators and should be used as inputs to business decisions, not as definitive predictions.
 
-# Start the service
-./run_fastapi.sh
-```
-
-### WebSocket Connection Failed
-- Ensure Redis is running (production)
-- Check Django Channels configuration
-- Verify ASGI server (Daphne) is running
-
-### No Product Image Displayed
-- Normal behavior if product not in OpenFoodFacts
-- Check browser console for image load errors
-- Verify `image_front_url` in JSON response
+Regulatory compliance assessments are indicative only and do not constitute legal advice.
 
 ---
 
-## ⚠️ Disclaimer
-
-This project is a **prototype**.  
-Scores and analyses are based on AI-driven indicators and available data, and should be used as **decision-support tools**, not as definitive market predictions.
-
----
-
-**Built with ❤️ for plant-based food innovation**
+**PlantPack Intelligence - Accelerating plant-based food innovation through AI-powered packaging analysis**
