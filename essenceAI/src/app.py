@@ -14,7 +14,7 @@ import sys
 sys.path.append(str(Path(__file__).parent))
 
 from competitor_data import OptimizedCompetitorIntelligence
-from rag_engine import OptimizedRAGEngine
+from rag_engine_optimized import OptimizedRAGEngine
 
 # Page configuration
 st.set_page_config(
@@ -152,26 +152,14 @@ st.markdown('<div class="sub-header">B2B Market Intelligence for Sustainable Foo
 # Input section
 st.markdown("### 💡 Product Concept Analysis")
 
-col1, col2 = st.columns([3, 1])
+product_concept = st.text_area(
+    "Describe your product concept",
+    placeholder="Example: Precision fermented cheese targeting French gourmet market with focus on artisan quality and sustainability",
+    height=100,
+    help="Be specific about your product, target market, and unique value proposition"
+)
 
-with col1:
-    product_concept = st.text_area(
-        "Describe your product concept",
-        placeholder="Example: Precision fermented cheese targeting French gourmet market with focus on artisan quality and sustainability",
-        height=100,
-        help="Be specific about your product, target market, and unique value proposition"
-    )
-
-with col2:
-    st.markdown("**Quick Examples:**")
-    if st.button("🧀 PF Cheese", width='stretch'):
-        product_concept = "Precision fermented artisan cheese for European gourmet market"
-    if st.button("🍔 Plant Burger", width='stretch'):
-        product_concept = "Plant-based burger for fast-food chains emphasizing taste"
-    if st.button("🌊 Algae Protein", width='stretch'):
-        product_concept = "Algae-based protein powder for health-conscious athletes"
-
-analyze_button = st.button("🚀 Analyze Market", type="primary", width='stretch')
+analyze_button = st.button("🚀 Analyze Market", type="primary", use_container_width=True)
 
 if analyze_button and product_concept:
 
@@ -228,27 +216,41 @@ if analyze_button and product_concept:
                         valid_prices = df['Price_per_kg'].dropna()
                         valid_co2 = df['CO2_Emission_kg'].dropna()
 
-                        if len(valid_prices) > 0 and len(valid_co2) > 0:
-                            stats = {
-                                'avg_price_per_kg': round(valid_prices.mean(), 2),
-                                'avg_co2_emission': round(valid_co2.mean(), 2),
-                                'competitor_count': len(df),
-                                'price_range': {
-                                    'min': round(valid_prices.min(), 2),
-                                    'max': round(valid_prices.max(), 2)
-                                }
-                            }
+                        # Calculate data completeness
+                        price_completeness = len(valid_prices) / len(df) * 100 if len(df) > 0 else 0
+                        co2_completeness = len(valid_co2) / len(df) * 100 if len(df) > 0 else 0
 
-                            with col1:
-                                st.metric("Avg Price/kg", f"{currency_symbol}{stats['avg_price_per_kg']}")
-                            with col2:
-                                st.metric("Avg CO₂/kg", f"{stats['avg_co2_emission']} kg")
-                            with col3:
-                                st.metric("Competitors", stats['competitor_count'])
-                            with col4:
-                                st.metric("Price Range", f"{currency_symbol}{stats['price_range']['min']}-{currency_symbol}{stats['price_range']['max']}")
-                        else:
-                            st.warning("⚠️ Competitor data is incomplete. Some metrics may be unavailable.")
+                        with col1:
+                            if len(valid_prices) > 0:
+                                avg_price = round(valid_prices.mean(), 2)
+                                st.metric("Avg Price/kg", f"{currency_symbol}{avg_price}",
+                                         delta=f"{len(valid_prices)}/{len(df)} available" if len(valid_prices) < len(df) else None)
+                            else:
+                                st.metric("Avg Price/kg", "N/A", delta="No data available")
+
+                        with col2:
+                            if len(valid_co2) > 0:
+                                avg_co2 = round(valid_co2.mean(), 2)
+                                st.metric("Avg CO₂/kg", f"{avg_co2} kg",
+                                         delta=f"{len(valid_co2)}/{len(df)} available" if len(valid_co2) < len(df) else None)
+                            else:
+                                st.metric("Avg CO₂/kg", "N/A", delta="No data available")
+
+                        with col3:
+                            st.metric("Competitors Found", len(df))
+
+                        with col4:
+                            if len(valid_prices) > 0:
+                                price_range = f"{currency_symbol}{round(valid_prices.min(), 2)}-{currency_symbol}{round(valid_prices.max(), 2)}"
+                                st.metric("Price Range", price_range)
+                            else:
+                                st.metric("Price Range", "N/A")
+
+                        # Show data quality warning if needed
+                        if price_completeness < 50 or co2_completeness < 50:
+                            st.warning(f"⚠️ Data completeness: Price {price_completeness:.0f}%, CO₂ {co2_completeness:.0f}%. Some competitors may not have complete information available from public sources.")
+                        elif price_completeness < 100 or co2_completeness < 100:
+                            st.info(f"ℹ️ Data completeness: Price {price_completeness:.0f}%, CO₂ {co2_completeness:.0f}%. Click source links for more details.")
                     except Exception as e:
                         st.error(f"Error calculating metrics: {str(e)}")
 
@@ -257,8 +259,8 @@ if analyze_button and product_concept:
                     # Competitor table
                     st.markdown("#### 📋 Competitor Landscape")
 
-                    # Display table with source links
-                    display_columns = ['Company', 'Product', 'Price_per_kg', 'CO2_Emission_kg', 'Marketing_Claim']
+                    # Display only relevant columns (removed Price and CO2 as they're rarely available)
+                    display_columns = ['Company', 'Product', 'Marketing_Claim']
                     if 'Source' in df.columns:
                         display_columns.append('Source')
 
@@ -268,8 +270,8 @@ if analyze_button and product_concept:
                     if 'Source' in display_columns:
                         column_config["Source"] = st.column_config.LinkColumn(
                             "Source",
-                            help="Click to view source",
-                            display_text="🔗 View"
+                            help="Click to view source for pricing and sustainability data",
+                            display_text="🔗 View Details"
                         )
 
                     st.dataframe(
@@ -279,58 +281,68 @@ if analyze_button and product_concept:
                         column_config=column_config
                     )
 
-                    # Visualizations - only create if we have valid data
+                    st.info("💡 **Tip:** Click 'View Details' links to find pricing and environmental impact data on competitor websites.")
+
+                    # Visualizations - create with available data
                     if 'Price_per_kg' in df.columns and 'CO2_Emission_kg' in df.columns:
                         # Filter out rows with missing data for visualizations
-                        viz_df = df.dropna(subset=['Price_per_kg', 'CO2_Emission_kg'])
+                        viz_df_price = df.dropna(subset=['Price_per_kg'])
+                        viz_df_co2 = df.dropna(subset=['CO2_Emission_kg'])
+                        viz_df_both = df.dropna(subset=['Price_per_kg', 'CO2_Emission_kg'])
 
-                        if not viz_df.empty:
-                            col1, col2 = st.columns(2)
+                        col1, col2 = st.columns(2)
 
-                            with col1:
-                                # Price comparison
+                        with col1:
+                            # Price comparison - show if we have any price data
+                            if not viz_df_price.empty:
                                 fig_price = px.bar(
-                                    viz_df,
+                                    viz_df_price,
                                     x='Company',
                                     y='Price_per_kg',
-                                    title=f'Price Comparison ({currency_symbol}/kg)',
+                                    title=f'Price Comparison ({currency_symbol}/kg) - {len(viz_df_price)} companies',
                                     color='Price_per_kg',
                                     color_continuous_scale='Viridis'
                                 )
                                 fig_price.update_layout(showlegend=False)
                                 st.plotly_chart(fig_price, use_container_width=True)
+                            else:
+                                st.info("📊 Price data not available for visualization. Check source links for pricing information.")
 
-                            with col2:
-                                # CO2 comparison
+                        with col2:
+                            # CO2 comparison - show if we have any CO2 data
+                            if not viz_df_co2.empty:
                                 fig_co2 = px.bar(
-                                    viz_df,
+                                    viz_df_co2,
                                     x='Company',
                                     y='CO2_Emission_kg',
-                                    title='CO₂ Emissions (kg/kg product)',
+                                    title=f'CO₂ Emissions (kg/kg product) - {len(viz_df_co2)} companies',
                                     color='CO2_Emission_kg',
                                     color_continuous_scale='RdYlGn_r'
                                 )
                                 fig_co2.update_layout(showlegend=False)
                                 st.plotly_chart(fig_co2, use_container_width=True)
+                            else:
+                                st.info("📊 CO₂ data not available for visualization. Environmental impact data may not be publicly disclosed.")
 
-                            # Price vs CO2 scatter
+                        # Price vs CO2 scatter - only if we have both
+                        if not viz_df_both.empty:
                             hover_data_cols = ['Product']
-                            if 'Marketing_Claim' in viz_df.columns:
+                            if 'Marketing_Claim' in viz_df_both.columns:
                                 hover_data_cols.append('Marketing_Claim')
 
                             fig_scatter = px.scatter(
-                                viz_df,
+                                viz_df_both,
                                 x='CO2_Emission_kg',
                                 y='Price_per_kg',
                                 size='Price_per_kg',
                                 color='Company',
                                 hover_data=hover_data_cols,
-                                title='Price vs Environmental Impact',
+                                title=f'Price vs Environmental Impact - {len(viz_df_both)} companies with complete data',
                                 labels={'CO2_Emission_kg': 'CO₂ Emissions (kg)', 'Price_per_kg': f'Price ({currency_symbol}/kg)'}
                             )
                             st.plotly_chart(fig_scatter, use_container_width=True)
                         else:
-                            st.warning("⚠️ Insufficient data for visualizations.")
+                            st.info("📊 Combined price and CO₂ visualization requires both metrics. Visit source links for complete information.")
                     else:
                         st.warning("⚠️ Missing required columns for visualizations.")
 
@@ -343,23 +355,20 @@ if analyze_button and product_concept:
     with tab2:
         st.markdown("### 🎯 AI-Powered Marketing Strategy")
 
-        # Auto-initialize if not loaded
-        if not st.session_state.index_loaded and not st.session_state.auto_init_attempted:
-            st.session_state.auto_init_attempted = True
-            with st.spinner("🔄 Auto-initializing research database... (This may take a moment on first run)"):
+        # Auto-initialize research database on first access
+        if not st.session_state.index_loaded:
+            with st.spinner("🔄 Loading research database... (This happens once on first use)"):
                 try:
                     data_dir = Path(__file__).parent.parent / "data"
                     st.session_state.rag_engine = OptimizedRAGEngine(data_dir=str(data_dir))
                     st.session_state.rag_engine.initialize_index()
                     st.session_state.index_loaded = True
-                    st.success("✅ Research database loaded!")
+                    st.success("✅ Research database loaded successfully!")
                 except Exception as e:
-                    st.error(f"❌ Auto-initialization failed: {str(e)}")
-                    st.info("💡 Try clicking 'Initialize Research Database' in the sidebar manually.")
+                    st.error(f"❌ Failed to load research database: {str(e)}")
+                    st.info("💡 Make sure PDF research papers are in the 'data' folder.")
 
-        if not st.session_state.index_loaded:
-            st.warning("⚠️ Research database not loaded. Click 'Initialize Research Database' in the sidebar.")
-        else:
+        if st.session_state.index_loaded:
             with st.spinner("Analyzing research papers for marketing insights..."):
                 try:
                     rag_engine = st.session_state.rag_engine
@@ -469,23 +478,20 @@ if analyze_button and product_concept:
     with tab3:
         st.markdown("### 🔬 Consumer Research Insights")
 
-        # Auto-initialize if not loaded
-        if not st.session_state.index_loaded and not st.session_state.auto_init_attempted:
-            st.session_state.auto_init_attempted = True
-            with st.spinner("🔄 Auto-initializing research database... (This may take a moment on first run)"):
+        # Auto-initialize research database on first access
+        if not st.session_state.index_loaded:
+            with st.spinner("🔄 Loading research database... (This happens once on first use)"):
                 try:
                     data_dir = Path(__file__).parent.parent / "data"
                     st.session_state.rag_engine = OptimizedRAGEngine(data_dir=str(data_dir))
                     st.session_state.rag_engine.initialize_index()
                     st.session_state.index_loaded = True
-                    st.success("✅ Research database loaded!")
+                    st.success("✅ Research database loaded successfully!")
                 except Exception as e:
-                    st.error(f"❌ Auto-initialization failed: {str(e)}")
-                    st.info("💡 Try clicking 'Initialize Research Database' in the sidebar manually.")
+                    st.error(f"❌ Failed to load research database: {str(e)}")
+                    st.info("💡 Make sure PDF research papers are in the 'data' folder.")
 
-        if not st.session_state.index_loaded:
-            st.warning("⚠️ Research database not loaded. Click 'Initialize Research Database' in the sidebar.")
-        else:
+        if st.session_state.index_loaded:
             with st.spinner("Extracting insights from research papers..."):
                 try:
                     rag_engine = st.session_state.rag_engine

@@ -13,6 +13,7 @@ openai>=1.12.0
 anthropic>=0.18.0
 requests>=2.31.0
 tavily-python>=0.3.0
+ddgs>=1.0.0
 
 # Optional: Weaviate for cloud vector storage (recommended)
 weaviate-client>=3.25.0

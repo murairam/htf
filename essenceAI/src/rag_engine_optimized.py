@@ -59,17 +59,17 @@ class OptimizedRAGEngine(BaseRAGEngine):
             delay_seconds=2.0,  # Wait 2 seconds between requests
             embed_batch_size=5  # Very conservative batch size
         )
-        
+
         logger.info("✓ Using rate-limited embedding with 2s delays between requests")
 
     def initialize_index(self, force_reload: bool = False, max_retries: int = 3) -> bool:
         """
         Load or create index with optimizations and rate limit handling.
-        
+
         Args:
             force_reload: Force rebuilding the index
             max_retries: Maximum number of retries on rate limit errors
-            
+
         Returns:
             True if successful
         """
@@ -77,6 +77,11 @@ class OptimizedRAGEngine(BaseRAGEngine):
             # Try to load existing index first
             if not force_reload and self.persist_dir.exists():
                 logger.info("📚 Loading existing index...")
+
+                # Ensure embeddings are set up before loading
+                # This prevents deserialization issues with custom embedding models
+                self._setup_embeddings()
+
                 storage_context = StorageContext.from_defaults(
                     persist_dir=str(self.persist_dir)
                 )
@@ -101,7 +106,7 @@ class OptimizedRAGEngine(BaseRAGEngine):
 
                 # Create index with retry logic for rate limits
                 logger.info("⚙️ Creating index with optimized settings...")
-                
+
                 retry_count = 0
                 while retry_count < max_retries:
                     try:
@@ -110,7 +115,7 @@ class OptimizedRAGEngine(BaseRAGEngine):
                             show_progress=True
                         )
                         break  # Success!
-                        
+
                     except Exception as e:
                         error_msg = str(e).lower()
                         if "rate_limit" in error_msg or "429" in error_msg:
