@@ -3,6 +3,7 @@
 **AI-Powered Packaging Analysis and Go-to-Market Strategy for Plant-Based Food Products**
 
 PlantPack Intelligence is a multi-agent system that analyzes plant-based food products using structured data, packaging image analysis, and business objectives. It produces explainable scores across four dimensions and generates actionable go-to-market recommendations specifically tailored to the plant-based food ecosystem.
+<img width="1192" height="687" alt="image" src="https://github.com/user-attachments/assets/b7dbea21-50d1-4726-a0b7-ca21735b58da" />
 
 ---
 
@@ -563,10 +564,10 @@ FastAPI:
 
 ## Disclaimer
 
-PlantPack Intelligence is a prototype decision-support tool. Scores and analyses are AI-driven indicators and should be used as inputs to business decisions, not as definitive predictions.
+PlantMarket Advisor is a prototype decision-support tool. Scores and analyses are AI-driven indicators and should be used as inputs to business decisions, not as definitive predictions.
 
 Regulatory compliance assessments are indicative only and do not constitute legal advice.
 
 ---
 
-**PlantPack Intelligence - Accelerating plant-based food innovation through AI-powered packaging analysis**
+**PlantMarket Advisor- Accelerating plant-based food innovation through AI-powered packaging analysis**
