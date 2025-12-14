@@ -163,6 +163,8 @@ PlantPack Intelligence uses an Agentic Context Engineering (ACE) architecture wi
 |                    +----------------------------+
 +-----------------------------------------------------------------------------------+
 ```
+![WhatsApp Image 2025-12-14 at 15 56 38](https://github.com/user-attachments/assets/3acffe4b-15a5-48c2-b885-74ad1b02a1da)
+
 
 ### Agent Responsibilities
 
